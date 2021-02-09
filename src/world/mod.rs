@@ -39,9 +39,9 @@ mod tests {
         let location = TestLocation { x: 0.0, y: 0.0 };
         world.insert_entity(vec![location]);
         let data = world.data.data.get(&location.type_id()).unwrap()[0]
+            .clone()
             .downcast::<TestLocation>()
-            .unwrap()
-            .clone();
+            .unwrap();
         assert_eq!(*data, location);
     }
 
