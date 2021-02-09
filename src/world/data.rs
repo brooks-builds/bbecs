@@ -19,6 +19,12 @@ impl Data {
         self.data
             .insert(new_data.type_id(), vec![Rc::new(new_data)]);
     }
+
+    pub fn query<T: Send + Sync + 'static, S: Send + Sync + 'static>(&self) -> () {
+        dbg!("**********************");
+        dbg!(std::any::type_name::<T>());
+        dbg!("************************");
+    }
 }
 
 #[cfg(test)]
@@ -43,5 +49,19 @@ mod tests {
             .downcast::<i32>()
             .unwrap();
         assert_eq!(raw_data, Rc::new(32));
+    }
+
+    #[test]
+    fn query_for_data() {
+        let mut data = Data::new();
+        let entity = 32_i32;
+        let type_id = entity.type_id();
+        data.insert(entity);
+        // We are going to need to create a query struct that uses the builder pattern to create queries for types one at a time
+        let query = Query::new()
+            .with_type::<i32>() // takes in the type and stores the type id
+            .with_type::<f32>()
+            .build();
+        let result = data.query(query);
     }
 }
