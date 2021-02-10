@@ -4,6 +4,8 @@ use std::{
     rc::Rc,
 };
 
+use super::query::Query;
+
 #[derive(Debug)]
 pub struct Data {
     pub data: HashMap<TypeId, Vec<Rc<dyn Any>>>,
@@ -16,20 +18,27 @@ impl Data {
     }
 
     pub fn insert(&mut self, new_data: impl Any) {
-        self.data
-            .insert(new_data.type_id(), vec![Rc::new(new_data)]);
+        // self.data
+        //     .insert(new_data.type_id(), vec![Rc::new(new_data)]);
+
+        let raw_data = self.data.entry(new_data.type_id()).or_insert(vec![]);
+        raw_data.push(Rc::new(new_data));
     }
 
-    pub fn query<T: Send + Sync + 'static, S: Send + Sync + 'static>(&self) -> () {
-        dbg!("**********************");
-        dbg!(std::any::type_name::<T>());
-        dbg!("************************");
+    pub fn query(&self, query: Query) -> Vec<&Vec<Rc<dyn Any>>> {
+        query
+            .data_keys
+            .iter()
+            .filter_map(|data_key| self.data.get(data_key))
+            .collect()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use std::any::Any;
+
+    use crate::world::query::Query;
 
     use super::*;
 
@@ -52,16 +61,29 @@ mod tests {
     }
 
     #[test]
-    fn query_for_data() {
+    fn insert_multiple_data() {
         let mut data = Data::new();
-        let entity = 32_i32;
-        let type_id = entity.type_id();
-        data.insert(entity);
-        // We are going to need to create a query struct that uses the builder pattern to create queries for types one at a time
-        let query = Query::new()
-            .with_type::<i32>() // takes in the type and stores the type id
-            .with_type::<f32>()
-            .build();
-        let result = data.query(query);
+        let component_1 = 32;
+        let component_2 = 42;
+        data.insert(component_1);
+        data.insert(component_2);
+        let components = data.data.get(&component_1.type_id()).unwrap();
+        assert_eq!(components.len(), 2);
+    }
+
+    #[test]
+    #[allow(clippy::float_cmp)]
+    fn query_for_multiple_data() {
+        let mut data = Data::new();
+        let entity_1 = 32_i32;
+        let entity_2 = 64.0_f32;
+        data.insert(entity_1);
+        data.insert(entity_2);
+        let query = Query::new().with_type::<i32>().with_type::<f32>();
+        let entities = data.query(query);
+        let entity_1_data = entities[0][0].clone().downcast::<i32>().unwrap();
+        let entity_2_data = entities[1][0].clone().downcast::<f32>().unwrap();
+        assert_eq!(entity_1, *entity_1_data);
+        assert_eq!(entity_2, *entity_2_data);
     }
 }

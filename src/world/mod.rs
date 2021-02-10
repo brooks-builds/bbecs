@@ -1,8 +1,11 @@
+use std::rc::Rc;
 use std::{any::Any, fmt::Debug};
 
 use data::Data;
+use query::Query;
 
 mod data;
+pub mod query;
 
 pub struct World {
     data: Data,
@@ -18,6 +21,10 @@ impl World {
         for entity_part in entity_data {
             self.data.insert(entity_part);
         }
+    }
+
+    pub fn query(&self, query: Query) -> Vec<&Vec<Rc<dyn Any>>> {
+        self.data.query(query)
     }
 }
 
