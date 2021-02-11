@@ -17,10 +17,27 @@ impl World {
         Self { data }
     }
 
-    pub fn insert_entity(&mut self, entity_data: Vec<impl Any>) {
-        for entity_part in entity_data {
-            self.data.insert(entity_part);
-        }
+    /// We want to begin spawing an entity with all of its components into the ECS data
+    /// we can't do that all in one go unfortunately so we are using a builder style
+    /// pattern to enter the components one-by-one. This is meant to be used with the
+    /// `with_component` function.
+    pub fn spawn_entity(&mut self) -> &mut Self {
+        self
+    }
+
+    /// The second part of the spawning entity builder pattern functions. To use this call
+    /// `spawn_entity` first and then you can chain as many `with_component`s as you want.
+    /// Each component needs to be a unique type, otherwise they will be stored together in
+    /// the [Data](data.rs) component.
+    /// ```
+    /// let mut world = World::new();
+    /// world.spawn_entity()
+    ///     .with_component(32.0_f32)
+    ///     .with_component(16_i32);
+    /// ```
+    pub fn with_component<C: 'static>(&mut self, component: C) -> &mut Self {
+        self.data.insert(component);
+        self
     }
 
     pub fn query(&self, query: Query) -> Vec<&Vec<Rc<dyn Any>>> {
@@ -41,15 +58,25 @@ mod tests {
     }
 
     #[test]
-    fn insert_entity_into_world() {
+    fn spawn_entity() {
         let mut world = World::new();
         let location = TestLocation { x: 0.0, y: 0.0 };
-        world.insert_entity(vec![location]);
-        let data = world.data.data.get(&location.type_id()).unwrap()[0]
+        let velocity = (32, 34);
+        world
+            .spawn_entity()
+            .with_component(location)
+            .with_component(velocity);
+        let location_data = world.data.data.get(&location.type_id()).unwrap()[0]
             .clone()
             .downcast::<TestLocation>()
             .unwrap();
-        assert_eq!(*data, location);
+        assert_eq!(*location_data, location);
+
+        let velocity_data = world.data.data.get(&velocity.type_id()).unwrap()[0]
+            .clone()
+            .downcast::<(i32, i32)>()
+            .unwrap();
+        assert_eq!(*velocity_data, velocity);
     }
 
     #[derive(Debug, Clone, Copy, PartialEq)]

@@ -32,11 +32,24 @@ impl Data {
             .filter_map(|data_key| self.data.get(data_key))
             .collect()
     }
+
+    pub fn query_mut<C: 'static + Send + Sync>(&mut self) -> Vec<Rc<C>> {
+        let type_id = TypeId::of::<C>();
+        let mut results = vec![];
+        if let Some(components) = self.data.get_mut(&type_id) {
+            components.clone().into_iter().for_each(|component| {
+                results.push(component.downcast::<C>().unwrap());
+            })
+        }
+        results
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::any::Any;
+    use std::borrow::BorrowMut;
+    use std::ops::{Deref, DerefMut};
 
     use crate::world::query::Query;
 
@@ -85,5 +98,33 @@ mod tests {
         let entity_2_data = entities[1][0].clone().downcast::<f32>().unwrap();
         assert_eq!(entity_1, *entity_1_data);
         assert_eq!(entity_2, *entity_2_data);
+    }
+
+    #[test]
+    fn mutably_query_for_data() {
+        let mut data = Data::new();
+        let test_component = TestComponent { x: 25 };
+        data.insert(test_component);
+        let mut query_results = data
+            .query_mut::<TestComponent>()
+            .iter_mut()
+            // maybe do the get mut in the query function?
+            // or more likely use an RefCell inside the Rc
+            // https://doc.rust-lang.org/std/cell/index.html#introducing-mutability-inside-of-something-immutable
+            .map(|component| Rc::get_mut(component).unwrap())
+            .collect::<Vec<&mut TestComponent>>();
+        query_results[0].x += 1;
+        assert_eq!(*query_results[0], test_component);
+    }
+
+    #[derive(Debug, PartialEq, Clone, Copy)]
+    struct TestComponent {
+        x: i32,
+    }
+
+    impl TestComponent {
+        pub fn increment(&mut self) {
+            self.x += 1;
+        }
     }
 }
