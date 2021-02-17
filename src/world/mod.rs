@@ -1,21 +1,17 @@
-mod data;
+mod entity_data;
 
-use std::cell::Cell;
+use entity_data::{Components, EntityData};
 
 use crate::components::Component;
-use crate::resources::{Resources, ResourcesData};
-use data::Data;
 
 pub struct World {
-    data: Data,
-    resources: Resources,
+    entity_data: EntityData,
 }
 
 impl World {
     pub fn new() -> Self {
-        let data = Data::new();
-        let resources = Resources::new();
-        Self { data, resources }
+        let entity_data = EntityData::new();
+        Self { entity_data }
     }
 
     /// We want to begin spawing an entity with all of its components into the ECS data
@@ -37,49 +33,17 @@ impl World {
     ///     .with_component(16_i32);
     /// ```
     pub fn with_component(&mut self, name: &str, component: Component) -> &mut Self {
-        self.data.insert(name, component);
+        self.entity_data.insert(name, component);
         self
     }
 
-    pub fn query(&mut self, component_name: &str) -> Option<&mut Cell<Vec<Component>>> {
-        self.data.query_one_mut(component_name)
-    }
-
-    pub fn insert_resource(&mut self, name: &str, resource: ResourcesData) {
-        self.resources.insert(name, resource);
-    }
-
-    pub fn get_resource(&self, name: &str) -> Option<&ResourcesData> {
-        self.resources.get(name)
+    pub fn query_one(&self, name: &str) -> &Components {
+        self.entity_data.query_one(name)
     }
 }
 
 impl Default for World {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::components::Component;
-
-    use super::World;
-
-    #[test]
-    fn create_new_world() {
-        let world = World::new();
-        assert_eq!(world.data.data.len(), 0);
-    }
-
-    #[test]
-    fn spawn_entity() {
-        let mut world = World::new();
-        world
-            .spawn_entity()
-            .with_component("location", Component::create_vector_2(10.0, 10.0))
-            .with_component("velocity", Component::create_vector_2(0.5, 0.3));
-
-        todo!("query for locations and / or velocities");
     }
 }
