@@ -3,16 +3,19 @@ mod data;
 use std::cell::Cell;
 
 use crate::components::Component;
+use crate::resources::{Resources, ResourcesData};
 use data::Data;
 
 pub struct World {
     data: Data,
+    resources: Resources,
 }
 
 impl World {
     pub fn new() -> Self {
         let data = Data::new();
-        Self { data }
+        let resources = Resources::new();
+        Self { data, resources }
     }
 
     /// We want to begin spawing an entity with all of its components into the ECS data
@@ -40,6 +43,14 @@ impl World {
 
     pub fn query(&mut self, component_name: &str) -> Option<&mut Cell<Vec<Component>>> {
         self.data.query_one_mut(component_name)
+    }
+
+    pub fn insert_resource(&mut self, name: &str, resource: ResourcesData) {
+        self.resources.insert(name, resource);
+    }
+
+    pub fn get_resource(&self, name: &str) -> Option<&ResourcesData> {
+        self.resources.get(name)
     }
 }
 
