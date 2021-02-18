@@ -1,20 +1,25 @@
 mod entity_data;
 
+use std::hash::Hash;
+
 use entity_data::{Components, EntityData};
 
 use crate::components::Component;
+use crate::resources::resource::Resource;
+use crate::resources::resources_data::{GetResourceData, ResourcesData};
 
-pub struct World<T> {
+pub struct World<T, K> {
     entity_data: EntityData<T>,
+    resources: ResourcesData<K>,
 }
 
-impl<T> World<T>
+impl<T, K> World<T, K>
 where
     T: Eq + std::hash::Hash,
+    K: Eq + std::hash::Hash,
 {
     pub fn new() -> Self {
-        let entity_data = EntityData::<T>::new();
-        Self { entity_data }
+        Self::default()
     }
 
     /// We want to begin spawning an entity with all of its components into the ECS data
@@ -43,13 +48,25 @@ where
     pub fn query_one(&self, name: &T) -> &Components {
         self.entity_data.query_one(name)
     }
+
+    pub fn add_resource(&mut self, name: K, resource: Resource) {
+        self.resources.insert(name, resource);
+    }
+
+    pub fn get_resource(&self, name: &K) -> &GetResourceData {
+        self.resources.get(name)
+    }
 }
 
-impl<T> Default for World<T>
+impl<T, K> Default for World<T, K>
 where
-    T: Eq + std::hash::Hash,
+    T: Eq + Hash,
+    K: Eq + Hash,
 {
     fn default() -> Self {
-        Self::new()
+        Self {
+            entity_data: EntityData::<T>::new(),
+            resources: ResourcesData::<K>::new(),
+        }
     }
 }
