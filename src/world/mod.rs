@@ -4,17 +4,20 @@ use entity_data::{Components, EntityData};
 
 use crate::components::Component;
 
-pub struct World {
-    entity_data: EntityData,
+pub struct World<T> {
+    entity_data: EntityData<T>,
 }
 
-impl World {
+impl<T> World<T>
+where
+    T: Eq + std::hash::Hash,
+{
     pub fn new() -> Self {
-        let entity_data = EntityData::new();
+        let entity_data = EntityData::<T>::new();
         Self { entity_data }
     }
 
-    /// We want to begin spawing an entity with all of its components into the ECS data
+    /// We want to begin spawning an entity with all of its components into the ECS data
     /// we can't do that all in one go unfortunately so we are using a builder style
     /// pattern to enter the components one-by-one. This is meant to be used with the
     /// `with_component` function.
@@ -32,17 +35,20 @@ impl World {
     ///     .with_component(32.0_f32)
     ///     .with_component(16_i32);
     /// ```
-    pub fn with_component(&mut self, name: &str, component: Component) -> &mut Self {
+    pub fn with_component(&mut self, name: T, component: Component) -> &mut Self {
         self.entity_data.insert(name, component);
         self
     }
 
-    pub fn query_one(&self, name: &str) -> &Components {
+    pub fn query_one(&self, name: &T) -> &Components {
         self.entity_data.query_one(name)
     }
 }
 
-impl Default for World {
+impl<T> Default for World<T>
+where
+    T: Eq + std::hash::Hash,
+{
     fn default() -> Self {
         Self::new()
     }

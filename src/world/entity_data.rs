@@ -6,19 +6,23 @@ use crate::components::Component;
 
 pub type Components = Rc<RefCell<Vec<Component>>>;
 
-#[derive(Default)]
-pub struct EntityData {
-    components: HashMap<String, Rc<RefCell<Vec<Component>>>>,
+pub struct EntityData<K> {
+    components: HashMap<K, Rc<RefCell<Vec<Component>>>>,
 }
 
-impl EntityData {
+impl<K> EntityData<K>
+where
+    K: Eq + std::hash::Hash,
+{
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            components: HashMap::new(),
+        }
     }
 
-    pub fn insert(&mut self, name: &str, component: Component) {
+    pub fn insert(&mut self, name: K, component: Component) {
         self.components
-            .entry(name.to_owned())
+            .entry(name)
             .or_default()
             .borrow_mut()
             .push(component);
@@ -26,7 +30,7 @@ impl EntityData {
 
     /// Query for a single vector of components in the entity data hashmap. If we cannot find the components then we
     /// will panic.
-    pub fn query_one(&self, name: &str) -> &Components {
+    pub fn query_one(&self, name: &K) -> &Components {
         self.components.get(name).unwrap()
     }
 }
