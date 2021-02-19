@@ -6,6 +6,7 @@ pub enum Resource {
     Color(Color),
     Mesh(Mesh),
     Point(Point),
+    U32(u32),
 }
 
 impl Resource {
@@ -35,5 +36,13 @@ impl Resource {
 
     fn create_error_message(&self, type_name: &str) -> String {
         format!("Cannot cast to type {} as it is another type", type_name)
+    }
+
+    pub fn cast_u32(&self) -> u32 {
+        if let Self::U32(number) = self {
+            *number
+        } else {
+            panic!(self.create_error_message("u32"))
+        }
     }
 }
