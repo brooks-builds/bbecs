@@ -1,6 +1,6 @@
-use std::ops::{AddAssign, Sub};
+use std::ops::{AddAssign, Div, Sub};
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -48,6 +48,11 @@ impl Point {
     pub fn length(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
+
+    pub fn distance_to(&self, other: &Self) -> f32 {
+        let distance = *other - *self;
+        distance.length()
+    }
 }
 
 impl AddAssign for Point {
@@ -64,6 +69,17 @@ impl Sub for Point {
         Self {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
+        }
+    }
+}
+
+impl Div<usize> for Point {
+    type Output = Self;
+
+    fn div(self, rhs: usize) -> Self::Output {
+        Self {
+            x: self.x / rhs as f32,
+            y: self.y / rhs as f32,
         }
     }
 }
