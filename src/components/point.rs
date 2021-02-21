@@ -1,4 +1,6 @@
-#[derive(Default, Debug)]
+use std::ops::{AddAssign, Sub};
+
+#[derive(Default, Debug, Clone, Copy)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -45,5 +47,23 @@ impl Point {
     /// Get the length of the Point
     pub fn length(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+impl AddAssign for Point {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+impl Sub for Point {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
