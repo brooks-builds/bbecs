@@ -7,6 +7,7 @@ pub enum Resource {
     Mesh(Mesh),
     Point(Point),
     U32(u32),
+    F32(f32),
 }
 
 impl Resource {
@@ -43,6 +44,14 @@ impl Resource {
             *number
         } else {
             panic!(self.create_error_message("u32"))
+        }
+    }
+
+    pub fn cast_f32(&self) -> f32 {
+        if let Self::F32(number) = self {
+            *number
+        } else {
+            panic!(self.create_error_message("f32"))
         }
     }
 }

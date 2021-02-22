@@ -1,3 +1,4 @@
+use std::iter::Sum;
 use std::ops::{AddAssign, Div, Sub};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
@@ -81,5 +82,14 @@ impl Div<usize> for Point {
             x: self.x / rhs as f32,
             y: self.y / rhs as f32,
         }
+    }
+}
+
+impl Sum<Point> for Point {
+    fn sum<I: Iterator<Item = Point>>(points: I) -> Self {
+        points.fold(Self::new(0.0, 0.0), |mut summed_point, point| {
+            summed_point.add(&point);
+            summed_point
+        })
     }
 }
