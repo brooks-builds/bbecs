@@ -54,6 +54,10 @@ impl Point {
         let distance = *other - *self;
         distance.length()
     }
+
+    pub fn rotation(&self) -> f32 {
+        self.y.atan2(self.x)
+    }
 }
 
 impl AddAssign for Point {
