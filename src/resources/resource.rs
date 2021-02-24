@@ -8,10 +8,19 @@ pub enum Resource {
     Point(Point),
     U32(u32),
     F32(f32),
+    Usize(usize),
 }
 
 impl Resource {
     pub fn cast_color(&self) -> &Color {
+        if let Self::Color(color) = self {
+            color
+        } else {
+            panic!(self.create_error_message("color"));
+        }
+    }
+
+    pub fn cast_color_mut(&mut self) -> &mut Color {
         if let Self::Color(color) = self {
             color
         } else {
@@ -52,6 +61,22 @@ impl Resource {
             *number
         } else {
             panic!(self.create_error_message("f32"))
+        }
+    }
+
+    pub fn cast_usize(&self) -> usize {
+        if let Self::Usize(number) = self {
+            *number
+        } else {
+            panic!(self.create_error_message("usize"))
+        }
+    }
+
+    pub fn cast_usize_mut(&mut self) -> &mut usize {
+        if let Self::Usize(number) = self {
+            number
+        } else {
+            panic!(self.create_error_message("usize"))
         }
     }
 }
