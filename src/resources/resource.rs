@@ -36,7 +36,23 @@ impl Resource {
         }
     }
 
+    pub fn cast_mesh_mut(&mut self) -> &mut Mesh {
+        if let Self::Mesh(mesh) = self {
+            mesh
+        } else {
+            panic!(self.create_error_message("mesh"));
+        }
+    }
+
     pub fn cast_point(&self) -> &Point {
+        if let Self::Point(point) = self {
+            point
+        } else {
+            panic!(self.create_error_message("point"));
+        }
+    }
+
+    pub fn cast_point_mut(&mut self) -> &mut Point {
         if let Self::Point(point) = self {
             point
         } else {
