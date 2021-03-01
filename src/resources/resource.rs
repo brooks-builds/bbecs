@@ -2,6 +2,10 @@ use ggez::graphics::{Color, Mesh};
 
 use crate::data_types::point::Point;
 
+pub trait ResourceCast<T> {
+    fn cast(&self) -> &T;
+}
+
 pub enum Resource {
     Color(Color),
     Mesh(Mesh),
@@ -64,14 +68,6 @@ impl Resource {
         format!("Cannot cast to type {} as it is another type", type_name)
     }
 
-    pub fn cast_u32(&self) -> u32 {
-        if let Self::U32(number) = self {
-            *number
-        } else {
-            panic!(self.create_error_message("u32"))
-        }
-    }
-
     pub fn cast_f32(&self) -> f32 {
         if let Self::F32(number) = self {
             *number
@@ -93,6 +89,16 @@ impl Resource {
             number
         } else {
             panic!(self.create_error_message("usize"))
+        }
+    }
+}
+
+impl ResourceCast<u32> for Resource {
+    fn cast(&self) -> &u32 {
+        if let Self::U32(number) = self {
+            number
+        } else {
+            panic!(self.create_error_message("u32"));
         }
     }
 }

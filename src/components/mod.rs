@@ -22,3 +22,8 @@ impl CastComponents<Point> for Components {
         }
     }
 }
+
+pub enum Component {
+    Point,
+    F32,
+}

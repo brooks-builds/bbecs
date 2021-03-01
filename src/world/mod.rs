@@ -3,8 +3,20 @@ mod entity_data;
 use std::hash::Hash;
 
 use entity_data::EntityData;
+use ggez::graphics::{Color, Mesh};
 
-use crate::resources::resources_data::ResourcesData;
+use crate::components::Component;
+use crate::data_types::point::Point;
+use crate::resources::resource::Resource;
+use crate::resources::resources_data::{ResourceDataLens, ResourcesData};
+
+use self::entity_data::EntityDataTraits;
+
+pub trait WorldMethods<T> {
+    fn with_component(&mut self, name: &str, data: T) -> &mut Self;
+    fn add_resource(&mut self, name: String, data: T);
+    fn get_resource(&self, name: &str) -> &T;
+}
 
 pub struct World {
     entity_data: EntityData,
@@ -14,6 +26,14 @@ pub struct World {
 impl World {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn register(&mut self, name: String, component_type: Component) {
+        self.entity_data.register(name, component_type);
+    }
+
+    pub fn spawn_entity(&mut self) -> &mut Self {
+        self
     }
 }
 
@@ -31,5 +51,91 @@ impl Default for World {
             entity_data: EntityData::new(),
             resources: ResourcesData::new(),
         }
+    }
+}
+
+impl WorldMethods<Point> for World {
+    fn with_component(&mut self, name: &str, data: Point) -> &mut Self {
+        self.entity_data.insert(name, data);
+        self
+    }
+
+    fn add_resource(&mut self, name: String, data: Point) {
+        self.resources.insert(name, Resource::Point(data));
+    }
+
+    fn get_resource(&self, name: &str) -> &Point {
+        todo!()
+    }
+}
+
+impl WorldMethods<Color> for World {
+    fn with_component(&mut self, name: &str, data: Color) -> &mut Self {
+        self.entity_data.insert(name, data);
+        self
+    }
+
+    fn add_resource(&mut self, name: String, data: Color) {
+        todo!()
+    }
+
+    fn get_resource(&self, name: &str) -> &Color {
+        todo!()
+    }
+}
+
+impl WorldMethods<Mesh> for World {
+    fn with_component(&mut self, name: &str, data: Mesh) -> &mut Self {
+        todo!()
+    }
+
+    fn add_resource(&mut self, name: String, data: Mesh) {
+        self.resources.insert(name, Resource::Mesh(data));
+    }
+
+    fn get_resource(&self, name: &str) -> &Mesh {
+        todo!()
+    }
+}
+
+impl WorldMethods<u32> for World {
+    fn with_component(&mut self, name: &str, data: u32) -> &mut Self {
+        todo!()
+    }
+
+    fn add_resource(&mut self, name: String, data: u32) {
+        self.resources.insert(name, Resource::U32(data));
+    }
+
+    fn get_resource(&self, name: &str) -> &u32 {
+        self.resources.get(name)
+    }
+}
+
+impl WorldMethods<f32> for World {
+    fn with_component(&mut self, name: &str, data: f32) -> &mut Self {
+        todo!()
+    }
+
+    fn add_resource(&mut self, name: String, data: f32) {
+        self.resources.insert(name, Resource::F32(data));
+    }
+
+    fn get_resource(&self, name: &str) -> &f32 {
+        todo!()
+    }
+}
+
+impl WorldMethods<usize> for World {
+    fn with_component(&mut self, name: &str, data: usize) -> &mut Self {
+        todo!()
+    }
+
+    fn add_resource(&mut self, name: String, data: usize) {
+        self.resources.insert(name, Resource::Usize(data));
+    }
+
+    fn get_resource(&self, name: &str) -> &usize {
+        todo!()
     }
 }
