@@ -1,6 +1,6 @@
 use ggez::graphics::{Color, Mesh};
 
-use crate::components::point::Point;
+use crate::data_types::point::Point;
 
 pub enum Resource {
     Color(Color),

@@ -2,35 +2,33 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::components::Component;
+use crate::{components::Components, data_types::point::Point};
 
-pub type Components = Rc<RefCell<Vec<Component>>>;
-
-pub struct EntityData<K> {
-    components: HashMap<K, Rc<RefCell<Vec<Component>>>>,
+pub trait EntityDataTraits<T> {
+    fn register(&mut self, name: String);
+    fn insert(&mut self, name: &str, data: T);
 }
 
-impl<K> EntityData<K>
-where
-    K: Eq + std::hash::Hash,
-{
+pub struct EntityData {
+    components: HashMap<String, Rc<RefCell<Components>>>,
+}
+
+impl EntityData {
     pub fn new() -> Self {
         Self {
             components: HashMap::new(),
         }
     }
+}
 
-    pub fn insert(&mut self, name: K, component: Component) {
+impl EntityDataTraits<Point> for EntityData {
+    fn register(&mut self, name: String) {
         self.components
-            .entry(name)
-            .or_default()
-            .borrow_mut()
-            .push(component);
+            .insert(name, Rc::new(RefCell::new(Components::Point(vec![]))));
     }
 
-    /// Query for a single vector of components in the entity data hashmap. If we cannot find the components then we
-    /// will panic.
-    pub fn query_one(&self, name: &K) -> &Components {
-        self.components.get(name).unwrap()
+    fn insert(&mut self, name: &str, data: Point) {
+        let wrapped_components = self.components.get(name).unwrap();
+        let components = wrapped_components.borrow_mut();
     }
 }

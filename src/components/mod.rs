@@ -1,42 +1,24 @@
-use self::point::Point;
+use crate::data_types::point::Point;
 
-pub mod point;
-
-pub enum Component {
-    Point(Point),
-    F32(f32),
+pub trait CastComponents<T> {
+    fn cast_mut(&mut self) -> &mut Vec<T>;
 }
 
-impl Component {
-    pub fn cast_point(&self) -> &Point {
-        if let Self::Point(point) = self {
-            point
-        } else {
-            panic!("Tried to cast Component to something not a vector2");
-        }
-    }
+pub enum Components {
+    Point(Vec<Point>),
+    F32(Vec<f32>),
+}
 
-    pub fn cast_point_mut(&mut self) -> &mut Point {
-        if let Self::Point(point) = self {
-            point
-        } else {
-            panic!("Tried to cast Component to something not a vector2");
-        }
-    }
+// for each type of component, implement
+// cast
+// cast mut
 
-    pub fn cast_f32(&self) -> &f32 {
-        if let Self::F32(number) = self {
-            number
+impl CastComponents<Point> for Components {
+    fn cast_mut(&mut self) -> &mut Vec<Point> {
+        if let Components::Point(points) = self {
+            points
         } else {
-            panic!("Tried to cast Component to something not a f32");
-        }
-    }
-
-    pub fn cast_f32_mut(&mut self) -> &mut f32 {
-        if let Self::F32(number) = self {
-            number
-        } else {
-            panic!("Tried to cast Component to something not a f32");
+            panic!("These are not the points that you are looking for");
         }
     }
 }
