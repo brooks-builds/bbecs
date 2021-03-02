@@ -23,6 +23,16 @@ impl CastComponents<Point> for Components {
     }
 }
 
+impl CastComponents<f32> for Components {
+    fn cast_mut(&mut self) -> &mut Vec<f32> {
+        if let Components::F32(numbers) = self {
+            numbers
+        } else {
+            panic!("These are not the f32s that you are looking for");
+        }
+    }
+}
+
 pub enum Component {
     Point,
     F32,

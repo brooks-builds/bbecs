@@ -13,8 +13,8 @@ use crate::resources::resources_data::{ResourceDataLens, ResourcesData};
 use self::entity_data::EntityDataTraits;
 
 pub trait WorldMethods<T> {
-    fn with_component(&mut self, name: &str, data: T) -> &mut Self;
-    fn add_resource(&mut self, name: String, data: T);
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: T) -> &mut Self;
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: T);
     fn get_resource(&self, name: &str) -> &T;
 }
 
@@ -28,8 +28,8 @@ impl World {
         Self::default()
     }
 
-    pub fn register(&mut self, name: String, component_type: Component) {
-        self.entity_data.register(name, component_type);
+    pub fn register<S: Into<String>>(&mut self, name: S, component_type: Component) {
+        self.entity_data.register(name.into(), component_type);
     }
 
     pub fn spawn_entity(&mut self) -> &mut Self {
@@ -55,13 +55,13 @@ impl Default for World {
 }
 
 impl WorldMethods<Point> for World {
-    fn with_component(&mut self, name: &str, data: Point) -> &mut Self {
-        self.entity_data.insert(name, data);
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: Point) -> &mut Self {
+        self.entity_data.insert(name.into(), data);
         self
     }
 
-    fn add_resource(&mut self, name: String, data: Point) {
-        self.resources.insert(name, Resource::Point(data));
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Point) {
+        self.resources.insert(name.into(), Resource::Point(data));
     }
 
     fn get_resource(&self, name: &str) -> &Point {
@@ -70,13 +70,13 @@ impl WorldMethods<Point> for World {
 }
 
 impl WorldMethods<Color> for World {
-    fn with_component(&mut self, name: &str, data: Color) -> &mut Self {
-        self.entity_data.insert(name, data);
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: Color) -> &mut Self {
+        self.entity_data.insert(name.into(), data);
         self
     }
 
-    fn add_resource(&mut self, name: String, data: Color) {
-        todo!()
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Color) {
+        self.resources.insert(name.into(), Resource::Color(data));
     }
 
     fn get_resource(&self, name: &str) -> &Color {
@@ -85,12 +85,12 @@ impl WorldMethods<Color> for World {
 }
 
 impl WorldMethods<Mesh> for World {
-    fn with_component(&mut self, name: &str, data: Mesh) -> &mut Self {
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: Mesh) -> &mut Self {
         todo!()
     }
 
-    fn add_resource(&mut self, name: String, data: Mesh) {
-        self.resources.insert(name, Resource::Mesh(data));
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Mesh) {
+        self.resources.insert(name.into(), Resource::Mesh(data));
     }
 
     fn get_resource(&self, name: &str) -> &Mesh {
@@ -99,26 +99,27 @@ impl WorldMethods<Mesh> for World {
 }
 
 impl WorldMethods<u32> for World {
-    fn with_component(&mut self, name: &str, data: u32) -> &mut Self {
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: u32) -> &mut Self {
         todo!()
     }
 
-    fn add_resource(&mut self, name: String, data: u32) {
-        self.resources.insert(name, Resource::U32(data));
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: u32) {
+        self.resources.insert(name.into(), Resource::U32(data));
     }
 
     fn get_resource(&self, name: &str) -> &u32 {
-        self.resources.get(name)
+        todo!()
     }
 }
 
 impl WorldMethods<f32> for World {
-    fn with_component(&mut self, name: &str, data: f32) -> &mut Self {
-        todo!()
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: f32) -> &mut Self {
+        self.entity_data.insert(name.into(), data);
+        self
     }
 
-    fn add_resource(&mut self, name: String, data: f32) {
-        self.resources.insert(name, Resource::F32(data));
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: f32) {
+        self.resources.insert(name.into(), Resource::F32(data));
     }
 
     fn get_resource(&self, name: &str) -> &f32 {
@@ -127,12 +128,12 @@ impl WorldMethods<f32> for World {
 }
 
 impl WorldMethods<usize> for World {
-    fn with_component(&mut self, name: &str, data: usize) -> &mut Self {
+    fn with_component<S: Into<&'static str>>(&mut self, name: S, data: usize) -> &mut Self {
         todo!()
     }
 
-    fn add_resource(&mut self, name: String, data: usize) {
-        self.resources.insert(name, Resource::Usize(data));
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: usize) {
+        self.resources.insert(name.into(), Resource::Usize(data));
     }
 
     fn get_resource(&self, name: &str) -> &usize {
