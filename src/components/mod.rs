@@ -2,6 +2,7 @@ use crate::data_types::point::Point;
 
 pub trait CastComponents<T> {
     fn cast_mut(&mut self) -> &mut Vec<T>;
+    fn cast(&self) -> &Vec<T>;
 }
 
 pub enum Components {
@@ -21,6 +22,14 @@ impl CastComponents<Point> for Components {
             panic!("These are not the points that you are looking for");
         }
     }
+
+    fn cast(&self) -> &Vec<Point> {
+        if let Components::Point(points) = self {
+            points
+        } else {
+            panic!("No points to be found here, there is something else");
+        }
+    }
 }
 
 impl CastComponents<f32> for Components {
@@ -30,6 +39,10 @@ impl CastComponents<f32> for Components {
         } else {
             panic!("These are not the f32s that you are looking for");
         }
+    }
+
+    fn cast(&self) -> &Vec<f32> {
+        todo!()
     }
 }
 

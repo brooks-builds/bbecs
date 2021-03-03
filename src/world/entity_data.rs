@@ -29,6 +29,10 @@ impl EntityData {
         }));
         self.components.insert(name.into(), components);
     }
+
+    pub fn query_one(&self, name: &str) -> &Rc<RefCell<Components>> {
+        self.components.get(name).unwrap()
+    }
 }
 
 impl EntityDataTraits<Point> for EntityData {

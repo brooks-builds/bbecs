@@ -1,11 +1,13 @@
 mod entity_data;
 
+use std::cell::RefCell;
 use std::hash::Hash;
+use std::rc::Rc;
 
 use entity_data::EntityData;
 use ggez::graphics::{Color, Mesh};
 
-use crate::components::Component;
+use crate::components::{Component, Components};
 use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
 use crate::resources::resources_data::{ResourceDataLens, ResourcesData};
@@ -15,7 +17,8 @@ use self::entity_data::EntityDataTraits;
 pub trait WorldMethods<T> {
     fn with_component<S: Into<&'static str>>(&mut self, name: S, data: T) -> &mut Self;
     fn add_resource<S: Into<String>>(&mut self, name: S, data: T);
-    fn get_resource(&self, name: &str) -> &T;
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &T;
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut T;
 }
 
 pub struct World {
@@ -34,6 +37,10 @@ impl World {
 
     pub fn spawn_entity(&mut self) -> &mut Self {
         self
+    }
+
+    pub fn query_one<S: Into<String>>(&self, name: S) -> &Rc<RefCell<Components>> {
+        self.entity_data.query_one(&name.into())
     }
 }
 
@@ -64,7 +71,11 @@ impl WorldMethods<Point> for World {
         self.resources.insert(name.into(), Resource::Point(data));
     }
 
-    fn get_resource(&self, name: &str) -> &Point {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &Point {
+        self.resources.get(name.into())
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Point {
         todo!()
     }
 }
@@ -79,8 +90,12 @@ impl WorldMethods<Color> for World {
         self.resources.insert(name.into(), Resource::Color(data));
     }
 
-    fn get_resource(&self, name: &str) -> &Color {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &Color {
         todo!()
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Color {
+        self.resources.get_mut(name.into())
     }
 }
 
@@ -93,7 +108,11 @@ impl WorldMethods<Mesh> for World {
         self.resources.insert(name.into(), Resource::Mesh(data));
     }
 
-    fn get_resource(&self, name: &str) -> &Mesh {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &Mesh {
+        todo!()
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Mesh {
         todo!()
     }
 }
@@ -107,7 +126,11 @@ impl WorldMethods<u32> for World {
         self.resources.insert(name.into(), Resource::U32(data));
     }
 
-    fn get_resource(&self, name: &str) -> &u32 {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &u32 {
+        todo!()
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut u32 {
         todo!()
     }
 }
@@ -122,7 +145,11 @@ impl WorldMethods<f32> for World {
         self.resources.insert(name.into(), Resource::F32(data));
     }
 
-    fn get_resource(&self, name: &str) -> &f32 {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &f32 {
+        todo!()
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut f32 {
         todo!()
     }
 }
@@ -136,7 +163,11 @@ impl WorldMethods<usize> for World {
         self.resources.insert(name.into(), Resource::Usize(data));
     }
 
-    fn get_resource(&self, name: &str) -> &usize {
+    fn get_resource<S: Into<&'static str>>(&self, name: S) -> &usize {
+        todo!()
+    }
+
+    fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut usize {
         todo!()
     }
 }

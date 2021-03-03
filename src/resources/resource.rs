@@ -4,6 +4,7 @@ use crate::data_types::point::Point;
 
 pub trait ResourceCast<T> {
     fn cast(&self) -> &T;
+    fn cast_mut(&mut self) -> &mut T;
 }
 
 pub enum Resource {
@@ -99,6 +100,42 @@ impl ResourceCast<u32> for Resource {
             number
         } else {
             panic!(self.create_error_message("u32"));
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut u32 {
+        todo!()
+    }
+}
+
+impl ResourceCast<Point> for Resource {
+    fn cast(&self) -> &Point {
+        if let Resource::Point(point) = self {
+            point
+        } else {
+            panic!("I am not a point");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Point {
+        todo!()
+    }
+}
+
+impl ResourceCast<Color> for Resource {
+    fn cast(&self) -> &Color {
+        if let Resource::Color(color) = self {
+            color
+        } else {
+            panic!("These are not the colors you are looking for");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Color {
+        if let Resource::Color(color) = self {
+            color
+        } else {
+            panic!("These are not the colors you are looking for");
         }
     }
 }
