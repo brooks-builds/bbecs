@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use ggez::graphics::Color;
+use ggez::graphics::{Color, Mesh};
 
 use crate::components::{CastComponents, Component};
 use crate::{components::Components, data_types::point::Point};
@@ -26,6 +26,8 @@ impl EntityData {
         let components = Rc::new(RefCell::new(match component_type {
             Component::Point => Components::Point(vec![]),
             Component::F32 => Components::F32(vec![]),
+            Component::Color => Components::Color(vec![]),
+            Component::Mesh => Components::Mesh(vec![]),
         }));
         self.components.insert(name.into(), components);
     }
@@ -46,7 +48,9 @@ impl EntityDataTraits<Point> for EntityData {
 
 impl EntityDataTraits<Color> for EntityData {
     fn insert(&mut self, name: &str, data: Color) {
-        todo!()
+        let mut wrapped_components = self.components.get_mut(name).unwrap().borrow_mut();
+        let components = wrapped_components.cast_mut();
+        components.push(data);
     }
 }
 
@@ -55,5 +59,21 @@ impl EntityDataTraits<f32> for EntityData {
         let mut wrapped_components = self.components.get(name).unwrap().borrow_mut();
         let numbers = wrapped_components.cast_mut();
         numbers.push(data);
+    }
+}
+
+impl EntityDataTraits<Mesh> for EntityData {
+    fn insert(&mut self, name: &str, data: Mesh) {
+        let mut wrapped_meshes = self.components.get(name).unwrap().borrow_mut();
+        let meshes = wrapped_meshes.cast_mut();
+        meshes.push(data);
+    }
+}
+
+impl EntityDataTraits<u32> for EntityData {
+    fn insert(&mut self, name: &str, data: u32) {
+        let mut wrapped_u32s = self.components.get_mut(name).unwrap().borrow_mut();
+        let u32s = wrapped_u32s.cast_mut();
+        u32s.push(data);
     }
 }

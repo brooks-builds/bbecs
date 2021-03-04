@@ -1,7 +1,6 @@
 mod entity_data;
 
 use std::cell::RefCell;
-use std::hash::Hash;
 use std::rc::Rc;
 
 use entity_data::EntityData;
@@ -76,7 +75,7 @@ impl WorldMethods<Point> for World {
     }
 
     fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Point {
-        todo!()
+        self.resources.get_mut(name.into())
     }
 }
 
@@ -91,7 +90,7 @@ impl WorldMethods<Color> for World {
     }
 
     fn get_resource<S: Into<&'static str>>(&self, name: S) -> &Color {
-        todo!()
+        self.resources.get(name.into())
     }
 
     fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Color {
@@ -101,7 +100,8 @@ impl WorldMethods<Color> for World {
 
 impl WorldMethods<Mesh> for World {
     fn with_component<S: Into<&'static str>>(&mut self, name: S, data: Mesh) -> &mut Self {
-        todo!()
+        self.entity_data.insert(name.into(), data);
+        self
     }
 
     fn add_resource<S: Into<String>>(&mut self, name: S, data: Mesh) {
@@ -109,17 +109,18 @@ impl WorldMethods<Mesh> for World {
     }
 
     fn get_resource<S: Into<&'static str>>(&self, name: S) -> &Mesh {
-        todo!()
+        self.resources.get(name.into())
     }
 
     fn get_resource_mut<S: Into<&'static str>>(&mut self, name: S) -> &mut Mesh {
-        todo!()
+        self.resources.get_mut(name.into())
     }
 }
 
 impl WorldMethods<u32> for World {
     fn with_component<S: Into<&'static str>>(&mut self, name: S, data: u32) -> &mut Self {
-        todo!()
+        self.entity_data.insert(name.into(), data);
+        self
     }
 
     fn add_resource<S: Into<String>>(&mut self, name: S, data: u32) {

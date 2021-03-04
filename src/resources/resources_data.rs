@@ -1,10 +1,6 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::ops::Deref;
-use std::rc::Rc;
 
-use ggez::graphics::Color;
+use ggez::graphics::{Color, Mesh};
 
 use crate::data_types::point::Point;
 
@@ -44,7 +40,7 @@ impl ResourceDataLens<Point> for ResourcesData {
     }
 
     fn get_mut(&mut self, name: &str) -> &mut Point {
-        todo!()
+        self.resources.get_mut(name).unwrap().cast_mut()
     }
 }
 
@@ -54,6 +50,16 @@ impl ResourceDataLens<Color> for ResourcesData {
     }
 
     fn get_mut(&mut self, name: &str) -> &mut Color {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<Mesh> for ResourcesData {
+    fn get(&self, name: &str) -> &Mesh {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut Mesh {
         self.resources.get_mut(name).unwrap().cast_mut()
     }
 }

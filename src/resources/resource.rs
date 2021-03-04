@@ -139,3 +139,21 @@ impl ResourceCast<Color> for Resource {
         }
     }
 }
+
+impl ResourceCast<Mesh> for Resource {
+    fn cast(&self) -> &Mesh {
+        if let Resource::Mesh(mesh) = self {
+            mesh
+        } else {
+            panic!("You tried to cast but I am not a mesh");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Mesh {
+        if let Resource::Mesh(mesh) = self {
+            mesh
+        } else {
+            panic!("You tried to cast but I am not a mesh");
+        }
+    }
+}
