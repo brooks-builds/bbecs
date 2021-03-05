@@ -1,7 +1,13 @@
 use ggez::graphics::{Color, Mesh};
 
-use crate::components::point::Point;
+use crate::data_types::point::Point;
 
+pub trait ResourceCast<T> {
+    fn cast(&self) -> &T;
+    fn cast_mut(&mut self) -> &mut T;
+}
+
+#[derive(Debug)]
 pub enum Resource {
     Color(Color),
     Mesh(Mesh),
@@ -64,14 +70,6 @@ impl Resource {
         format!("Cannot cast to type {} as it is another type", type_name)
     }
 
-    pub fn cast_u32(&self) -> u32 {
-        if let Self::U32(number) = self {
-            *number
-        } else {
-            panic!(self.create_error_message("u32"))
-        }
-    }
-
     pub fn cast_f32(&self) -> f32 {
         if let Self::F32(number) = self {
             *number
@@ -93,6 +91,110 @@ impl Resource {
             number
         } else {
             panic!(self.create_error_message("usize"))
+        }
+    }
+}
+
+impl ResourceCast<u32> for Resource {
+    fn cast(&self) -> &u32 {
+        if let Self::U32(number) = self {
+            number
+        } else {
+            panic!(self.create_error_message("u32"));
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut u32 {
+        todo!()
+    }
+}
+
+impl ResourceCast<Point> for Resource {
+    fn cast(&self) -> &Point {
+        if let Resource::Point(point) = self {
+            point
+        } else {
+            panic!("I am not a point");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Point {
+        if let Resource::Point(point) = self {
+            point
+        } else {
+            panic!("Tried to cast a {:?} resource to a Point", self);
+        }
+    }
+}
+
+impl ResourceCast<Color> for Resource {
+    fn cast(&self) -> &Color {
+        if let Resource::Color(color) = self {
+            color
+        } else {
+            panic!("These are not the colors you are looking for");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Color {
+        if let Resource::Color(color) = self {
+            color
+        } else {
+            panic!("These are not the colors you are looking for");
+        }
+    }
+}
+
+impl ResourceCast<Mesh> for Resource {
+    fn cast(&self) -> &Mesh {
+        if let Resource::Mesh(mesh) = self {
+            mesh
+        } else {
+            panic!("You tried to cast but I am not a mesh");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut Mesh {
+        if let Resource::Mesh(mesh) = self {
+            mesh
+        } else {
+            panic!("You tried to cast but I am not a mesh");
+        }
+    }
+}
+
+impl ResourceCast<f32> for Resource {
+    fn cast(&self) -> &f32 {
+        if let Resource::F32(number) = self {
+            number
+        } else {
+            panic!("you tried to cast to an f32, but the resource was the wrong type");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut f32 {
+        if let Resource::F32(number) = self {
+            number
+        } else {
+            panic!("you tried to cast to an f32, but the resource was the wrong type");
+        }
+    }
+}
+
+impl ResourceCast<usize> for Resource {
+    fn cast(&self) -> &usize {
+        if let Resource::Usize(number) = self {
+            number
+        } else {
+            panic!("Tried to cast to a usize when not a usize");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut usize {
+        if let Resource::Usize(number) = self {
+            number
+        } else {
+            panic!("Tried to cast to a usize when not a usize");
         }
     }
 }

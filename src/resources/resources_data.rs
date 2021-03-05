@@ -1,41 +1,95 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::rc::Rc;
 
-use super::resource::Resource;
+use ggez::graphics::{Color, Mesh};
 
-pub type GetResourceData = Rc<RefCell<Resource>>;
+use crate::data_types::point::Point;
 
-pub struct ResourcesData<K> {
-    resources: HashMap<K, Rc<RefCell<Resource>>>,
+use super::resource::{Resource, ResourceCast};
+
+pub trait ResourceDataLens<T> {
+    fn get(&self, name: &str) -> &T;
+    fn get_mut(&mut self, name: &str) -> &mut T;
 }
 
-impl<K> ResourcesData<K>
-where
-    K: Eq + std::hash::Hash,
-{
+pub struct ResourcesData {
+    resources: HashMap<String, Resource>,
+}
+
+impl ResourcesData {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn insert(&mut self, name: K, resource: Resource) {
-        self.resources.insert(name, Rc::new(RefCell::new(resource)));
-    }
-
-    /// Get a reference to the resource given the key. If we cannot find the resource we will panic and crash.
-    pub fn get(&self, name: &K) -> &GetResourceData {
-        self.resources.get(name).unwrap()
+    pub fn insert(&mut self, name: String, resource: Resource) {
+        self.resources.insert(name, resource);
     }
 }
 
-impl<K> Default for ResourcesData<K>
-where
-    K: Eq + Hash,
-{
+impl Default for ResourcesData {
     fn default() -> Self {
         Self {
             resources: HashMap::new(),
         }
+    }
+}
+
+impl ResourceDataLens<Point> for ResourcesData {
+    fn get(&self, name: &str) -> &Point {
+        let resource = self.resources.get(name).unwrap().cast();
+        resource
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut Point {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<Color> for ResourcesData {
+    fn get(&self, name: &str) -> &Color {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut Color {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<Mesh> for ResourcesData {
+    fn get(&self, name: &str) -> &Mesh {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut Mesh {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<u32> for ResourcesData {
+    fn get(&self, name: &str) -> &u32 {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut u32 {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<f32> for ResourcesData {
+    fn get(&self, name: &str) -> &f32 {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut f32 {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<usize> for ResourcesData {
+    fn get(&self, name: &str) -> &usize {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut usize {
+        self.resources.get_mut(name).unwrap().cast_mut()
     }
 }

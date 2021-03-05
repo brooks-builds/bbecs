@@ -1,72 +1,175 @@
 mod entity_data;
 
-use std::hash::Hash;
+use std::cell::RefCell;
+use std::rc::Rc;
 
-use entity_data::{Components, EntityData};
+use entity_data::EntityData;
+use ggez::graphics::{Color, Mesh};
 
-use crate::components::Component;
+use crate::components::{Component, Components};
+use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
-use crate::resources::resources_data::{GetResourceData, ResourcesData};
+use crate::resources::resources_data::{ResourceDataLens, ResourcesData};
 
-pub struct World<T, K> {
-    entity_data: EntityData<T>,
-    resources: ResourcesData<K>,
+use self::entity_data::EntityDataTraits;
+
+pub trait WorldMethods<T> {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: T) -> &mut Self;
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: T);
+    fn get_resource<S: Into<String>>(&self, name: S) -> &T;
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut T;
 }
 
-impl<T, K> World<T, K>
-where
-    T: Eq + std::hash::Hash,
-    K: Eq + std::hash::Hash,
-{
+pub struct World {
+    pub entity_data: EntityData,
+    resources: ResourcesData,
+}
+
+impl World {
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// We want to begin spawning an entity with all of its components into the ECS data
-    /// we can't do that all in one go unfortunately so we are using a builder style
-    /// pattern to enter the components one-by-one. This is meant to be used with the
-    /// `with_component` function.
+    pub fn register<S: Into<String>>(&mut self, name: S, component_type: Component) {
+        self.entity_data.register(name.into(), component_type);
+    }
+
     pub fn spawn_entity(&mut self) -> &mut Self {
         self
     }
 
-    /// The second part of the spawning entity builder pattern functions. To use this call
-    /// `spawn_entity` first and then you can chain as many `with_component`s as you want.
-    /// Each component is given a name which will determine how it is stored in the data. The components
-    /// are made of the enum Component.
-    /// ```
-    /// let mut world = World::new();
-    /// world.spawn_entity()
-    ///     .with_component(32.0_f32)
-    ///     .with_component(16_i32);
-    /// ```
-    pub fn with_component(&mut self, name: T, component: Component) -> &mut Self {
-        self.entity_data.insert(name, component);
-        self
-    }
-
-    pub fn query_one(&self, name: &T) -> &Components {
-        self.entity_data.query_one(name)
-    }
-
-    pub fn add_resource(&mut self, name: K, resource: Resource) {
-        self.resources.insert(name, resource);
-    }
-
-    pub fn get_resource(&self, name: &K) -> &GetResourceData {
-        self.resources.get(name)
+    pub fn query_one<S: Into<String>>(&self, name: S) -> &Rc<RefCell<Components>> {
+        self.entity_data.query_one(&name.into())
     }
 }
 
-impl<T, K> Default for World<T, K>
-where
-    T: Eq + Hash,
-    K: Eq + Hash,
-{
+// todo implement the following methods
+// register component
+// insert spawn entity
+// with component
+// query one
+// insert resource
+// get resource
+
+impl Default for World {
     fn default() -> Self {
         Self {
-            entity_data: EntityData::<T>::new(),
-            resources: ResourcesData::<K>::new(),
+            entity_data: EntityData::new(),
+            resources: ResourcesData::new(),
         }
+    }
+}
+
+impl WorldMethods<Point> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: Point) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Point) {
+        self.resources.insert(name.into(), Resource::Point(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &Point {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut Point {
+        self.resources.get_mut(&name.into())
+    }
+}
+
+impl WorldMethods<Color> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: Color) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Color) {
+        self.resources.insert(name.into(), Resource::Color(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &Color {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut Color {
+        self.resources.get_mut(&name.into())
+    }
+}
+
+impl WorldMethods<Mesh> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: Mesh) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Mesh) {
+        self.resources.insert(name.into(), Resource::Mesh(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &Mesh {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut Mesh {
+        self.resources.get_mut(&name.into())
+    }
+}
+
+impl WorldMethods<u32> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: u32) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: u32) {
+        self.resources.insert(name.into(), Resource::U32(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &u32 {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut u32 {
+        self.resources.get_mut(&name.into())
+    }
+}
+
+impl WorldMethods<f32> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: f32) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: f32) {
+        self.resources.insert(name.into(), Resource::F32(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &f32 {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut f32 {
+        self.resources.get_mut(&name.into())
+    }
+}
+
+impl WorldMethods<usize> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: usize) -> &mut Self {
+        self.entity_data.insert(&name.into(), data);
+        self
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: usize) {
+        self.resources.insert(name.into(), Resource::Usize(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> &usize {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> &mut usize {
+        self.resources.get_mut(&name.into())
     }
 }
