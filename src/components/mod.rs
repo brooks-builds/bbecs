@@ -7,12 +7,14 @@ pub trait CastComponents<T> {
     fn cast(&self) -> &Vec<T>;
 }
 
+#[derive(Debug)]
 pub enum Components {
     Point(Vec<Point>),
     F32(Vec<f32>),
     Color(Vec<Color>),
     Mesh(Vec<Mesh>),
     U32(Vec<u32>),
+    Usize(Vec<usize>),
 }
 
 // for each type of component, implement
@@ -47,7 +49,11 @@ impl CastComponents<f32> for Components {
     }
 
     fn cast(&self) -> &Vec<f32> {
-        todo!()
+        if let Components::F32(number) = self {
+            number
+        } else {
+            panic!("Tried to cast a {:?} component to a &Vec<f32>", self);
+        }
     }
 }
 
@@ -105,10 +111,29 @@ impl CastComponents<u32> for Components {
     }
 }
 
+impl CastComponents<usize> for Components {
+    fn cast_mut(&mut self) -> &mut Vec<usize> {
+        if let Components::Usize(number) = self {
+            number
+        } else {
+            panic!("tried to cast to a usize when not a usize");
+        }
+    }
+
+    fn cast(&self) -> &Vec<usize> {
+        if let Components::Usize(number) = self {
+            number
+        } else {
+            panic!("tried to cast to a usize when not a usize");
+        }
+    }
+}
+
 pub enum Component {
     Point,
     F32,
     Color,
     Mesh,
     U32,
+    Usize,
 }

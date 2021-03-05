@@ -11,8 +11,9 @@ pub trait EntityDataTraits<T> {
     fn insert(&mut self, name: &str, data: T);
 }
 
+#[derive(Debug, Default)]
 pub struct EntityData {
-    components: HashMap<String, Rc<RefCell<Components>>>,
+    pub components: HashMap<String, Rc<RefCell<Components>>>,
 }
 
 impl EntityData {
@@ -22,14 +23,16 @@ impl EntityData {
         }
     }
 
-    pub fn register<T: Into<String>>(&mut self, name: T, component_type: Component) {
+    pub fn register(&mut self, name: String, component_type: Component) {
         let components = Rc::new(RefCell::new(match component_type {
             Component::Point => Components::Point(vec![]),
             Component::F32 => Components::F32(vec![]),
             Component::Color => Components::Color(vec![]),
             Component::Mesh => Components::Mesh(vec![]),
+            Component::U32 => Components::U32(vec![]),
+            Component::Usize => Components::Usize(vec![]),
         }));
-        self.components.insert(name.into(), components);
+        self.components.insert(name, components);
     }
 
     pub fn query_one(&self, name: &str) -> &Rc<RefCell<Components>> {
@@ -75,5 +78,13 @@ impl EntityDataTraits<u32> for EntityData {
         let mut wrapped_u32s = self.components.get_mut(name).unwrap().borrow_mut();
         let u32s = wrapped_u32s.cast_mut();
         u32s.push(data);
+    }
+}
+
+impl EntityDataTraits<usize> for EntityData {
+    fn insert(&mut self, name: &str, data: usize) {
+        let mut wrapped_usizes = self.components.get_mut(name).unwrap().borrow_mut();
+        let usizes: &mut Vec<usize> = wrapped_usizes.cast_mut();
+        usizes.push(data);
     }
 }

@@ -7,6 +7,7 @@ pub trait ResourceCast<T> {
     fn cast_mut(&mut self) -> &mut T;
 }
 
+#[derive(Debug)]
 pub enum Resource {
     Color(Color),
     Mesh(Mesh),
@@ -118,7 +119,11 @@ impl ResourceCast<Point> for Resource {
     }
 
     fn cast_mut(&mut self) -> &mut Point {
-        todo!()
+        if let Resource::Point(point) = self {
+            point
+        } else {
+            panic!("Tried to cast a {:?} resource to a Point", self);
+        }
     }
 }
 
@@ -154,6 +159,42 @@ impl ResourceCast<Mesh> for Resource {
             mesh
         } else {
             panic!("You tried to cast but I am not a mesh");
+        }
+    }
+}
+
+impl ResourceCast<f32> for Resource {
+    fn cast(&self) -> &f32 {
+        if let Resource::F32(number) = self {
+            number
+        } else {
+            panic!("you tried to cast to an f32, but the resource was the wrong type");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut f32 {
+        if let Resource::F32(number) = self {
+            number
+        } else {
+            panic!("you tried to cast to an f32, but the resource was the wrong type");
+        }
+    }
+}
+
+impl ResourceCast<usize> for Resource {
+    fn cast(&self) -> &usize {
+        if let Resource::Usize(number) = self {
+            number
+        } else {
+            panic!("Tried to cast to a usize when not a usize");
+        }
+    }
+
+    fn cast_mut(&mut self) -> &mut usize {
+        if let Resource::Usize(number) = self {
+            number
+        } else {
+            panic!("Tried to cast to a usize when not a usize");
         }
     }
 }

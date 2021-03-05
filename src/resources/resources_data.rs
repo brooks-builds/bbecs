@@ -63,3 +63,33 @@ impl ResourceDataLens<Mesh> for ResourcesData {
         self.resources.get_mut(name).unwrap().cast_mut()
     }
 }
+
+impl ResourceDataLens<u32> for ResourcesData {
+    fn get(&self, name: &str) -> &u32 {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut u32 {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<f32> for ResourcesData {
+    fn get(&self, name: &str) -> &f32 {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut f32 {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<usize> for ResourcesData {
+    fn get(&self, name: &str) -> &usize {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> &mut usize {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
