@@ -25,21 +25,47 @@ impl Point {
         [self.x, self.y]
     }
 
+    /// Adds another point to the one being called, mutating itself
+    /// ```
+    /// use bbecs::data_types::point::Point;
+    /// let mut location = Point::new(0.0, 0.0);
+    /// let velocity = Point::new(1.0, 2.0);
+    /// location.add(&velocity);
+    /// assert_eq!(location, Point::new(1.0, 2.0));
+    /// ```
     pub fn add(&mut self, other: &Point) {
         self.x += other.x;
         self.y += other.y;
     }
 
     /// Create a new Point that is perpendicular to the self pointing towards the left
+    /// ```
+    /// use bbecs::data_types::point::Point;
+    /// let velocity = Point::new(10.0, 25.0);
+    /// let left_velocity = velocity.to_perpendicular_left();
+    /// assert_eq!(left_velocity, Point::new(25.0, -10.0));
+    /// ```
     pub fn to_perpendicular_left(&self) -> Self {
         Self::new(self.y, -self.x)
     }
-
+    /// Create a new Point that is perpendicular to the self pointing towards the right
+    /// ```
+    /// use bbecs::data_types::point::Point;
+    /// let velocity = Point::new(10.0, 25.0);
+    /// let right_velocity = velocity.to_perpendicular_right();
+    /// assert_eq!(right_velocity, Point::new(-25.0, 10.0));
+    /// ```
     pub fn to_perpendicular_right(&self) -> Self {
         Self::new(-self.y, self.x)
     }
 
-    /// Multiply a scalar (single number) by the x and y mutably.
+    /// Multiplies the x and y by a scalar (single f32) and mutates itself
+    /// ```
+    /// use bbecs::data_types::point::Point;
+    /// let mut point = Point::new(1.0, 2.0);
+    /// point.multiply_scalar(10.0);
+    /// assert_eq!(point, Point::new(10.0, 20.0));
+    /// ```
     pub fn multiply_scalar(&mut self, scalar: f32) {
         self.x *= scalar;
         self.y *= scalar;
