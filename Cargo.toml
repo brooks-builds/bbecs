@@ -3,11 +3,13 @@ name = "bbecs"
 version = "0.1.0"
 authors = ["Brooks Patton <brooks@brookzerker.com>"]
 edition = "2018"
+description = "ECS library for Brooks Builds projects made live on Twitch at https://twitch.tv/brookzerker."
+license = "MIT"
+repository = "https://github.com/brooks-builds/bbecs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 eyre = "0.6.5"
 ggez = "0.5.1"
-nalgebra = "0.24.1"
 thiserror = "1.0.24"
