@@ -9,6 +9,10 @@ pub trait CastComponents<T> {
     fn cast(&self) -> Result<&Vec<T>>;
 }
 
+/// These components are used to store data into the world. Each of the components contains
+/// a vector of the appropriate data. Generally consumers of this library will not need to
+/// call Components directly. However the methods attached to components will be used to
+/// extract the data.
 #[derive(Debug, Clone)]
 pub enum Components {
     Point(Vec<Point>),
@@ -20,6 +24,13 @@ pub enum Components {
 }
 
 impl CastComponents<Point> for Components {
+    /// Cast the components to it's contained data as long as it is really a point.
+    /// ```
+    /// use bbecs::components::{Components, CastComponents};
+    /// use bbecs::data_types::point::Point;
+    /// let mut wrapped_locations = Components::Point(vec![]);
+    /// let locations: &mut Vec<Point> = wrapped_locations.cast_mut().unwrap();
+    /// ```
     fn cast_mut(&mut self) -> Result<&mut Vec<Point>> {
         if let Components::Point(points) = self {
             Ok(points)
