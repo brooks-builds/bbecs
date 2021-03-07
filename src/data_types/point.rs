@@ -1,6 +1,8 @@
 use std::iter::Sum;
 use std::ops::{AddAssign, Div, Sub};
 
+/// Point that stores a f32 x and y with methods for manipulating the point. Uses Vector math
+/// for the methods
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: f32,
@@ -12,6 +14,13 @@ impl Point {
         Self { x, y }
     }
 
+    /// Creates an array of the point with x being the first element, and y being the second.
+    /// This is mostly useful for working with ggez points as they can cast from arrays.
+    /// ```
+    /// use bbecs::data_types::point::Point;
+    /// let location = Point::new(15.0, 7.0);
+    /// assert_eq!(location.to_array(), [15.0, 7.0]);
+    /// ```
     pub fn to_array(&self) -> [f32; 2] {
         [self.x, self.y]
     }
