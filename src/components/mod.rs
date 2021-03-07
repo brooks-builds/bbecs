@@ -9,7 +9,7 @@ pub trait CastComponents<T> {
     fn cast(&self) -> Result<&Vec<T>>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Components {
     Point(Vec<Point>),
     F32(Vec<f32>),
@@ -25,8 +25,8 @@ impl CastComponents<Point> for Components {
             Ok(points)
         } else {
             Err(BbEcsError::CastingComponents {
-                from: "Components".to_owned(),
-                to: "&mut Vec<Point>".to_owned(),
+                from: self.clone(),
+                to: Components::Point(vec![]),
             }
             .into())
         }
@@ -37,8 +37,8 @@ impl CastComponents<Point> for Components {
             Ok(points)
         } else {
             Err(BbEcsError::CastingComponents {
-                from: "Components".to_owned(),
-                to: "&mut Vec<Point>".to_owned(),
+                from: self.clone(),
+                to: Components::Point(vec![]),
             }
             .into())
         }
@@ -48,17 +48,25 @@ impl CastComponents<Point> for Components {
 impl CastComponents<f32> for Components {
     fn cast_mut(&mut self) -> Result<&mut Vec<f32>> {
         if let Components::F32(numbers) = self {
-            numbers
+            Ok(numbers)
         } else {
-            panic!("These are not the f32s that you are looking for");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::F32(vec![]),
+            }
+            .into())
         }
     }
 
     fn cast(&self) -> Result<&Vec<f32>> {
         if let Components::F32(number) = self {
-            number
+            Ok(number)
         } else {
-            panic!("Tried to cast a {:?} component to a &Vec<f32>", self);
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::F32(vec![]),
+            }
+            .into())
         }
     }
 }
@@ -66,17 +74,25 @@ impl CastComponents<f32> for Components {
 impl CastComponents<Color> for Components {
     fn cast_mut(&mut self) -> Result<&mut Vec<Color>> {
         if let Components::Color(color) = self {
-            color
+            Ok(color)
         } else {
-            panic!("No color here, it was something else");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Color(vec![]),
+            }
+            .into())
         }
     }
 
     fn cast(&self) -> Result<&Vec<Color>> {
         if let Components::Color(color) = self {
-            color
+            Ok(color)
         } else {
-            panic!("No color here, it was something else");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Color(vec![]),
+            }
+            .into())
         }
     }
 }
@@ -84,17 +100,25 @@ impl CastComponents<Color> for Components {
 impl CastComponents<Mesh> for Components {
     fn cast_mut(&mut self) -> Result<&mut Vec<Mesh>> {
         if let Components::Mesh(mesh) = self {
-            mesh
+            Ok(mesh)
         } else {
-            panic!("I am not a mesh, but you tried to cast me into one anyways");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Mesh(vec![]),
+            }
+            .into())
         }
     }
 
     fn cast(&self) -> Result<&Vec<Mesh>> {
         if let Components::Mesh(mesh) = self {
-            mesh
+            Ok(mesh)
         } else {
-            panic!("I am not a mesh, but you tried to cast me into one anyways");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Mesh(vec![]),
+            }
+            .into())
         }
     }
 }
@@ -102,17 +126,25 @@ impl CastComponents<Mesh> for Components {
 impl CastComponents<u32> for Components {
     fn cast_mut(&mut self) -> Result<&mut Vec<u32>> {
         if let Components::U32(number) = self {
-            number
+            Ok(number)
         } else {
-            panic!("Tried to cast to a u32");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::U32(vec![]),
+            }
+            .into())
         }
     }
 
     fn cast(&self) -> Result<&Vec<u32>> {
         if let Components::U32(number) = self {
-            number
+            Ok(number)
         } else {
-            panic!("Tried to cast to a u32");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::U32(vec![]),
+            }
+            .into())
         }
     }
 }
@@ -120,17 +152,25 @@ impl CastComponents<u32> for Components {
 impl CastComponents<usize> for Components {
     fn cast_mut(&mut self) -> Result<&mut Vec<usize>> {
         if let Components::Usize(number) = self {
-            number
+            Ok(number)
         } else {
-            panic!("tried to cast to a usize when not a usize");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Usize(vec![]),
+            }
+            .into())
         }
     }
 
     fn cast(&self) -> Result<&Vec<usize>> {
         if let Components::Usize(number) = self {
-            number
+            Ok(number)
         } else {
-            panic!("tried to cast to a usize when not a usize");
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Usize(vec![]),
+            }
+            .into())
         }
     }
 }
