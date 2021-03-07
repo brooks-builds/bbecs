@@ -46,6 +46,6 @@ jobs:
       - name: Build
         run: cargo build --release
       - uses: katyo/publish-crates@v1
-          with:
-            registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-            dry-run: true
+        with:
+          registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          dry-run: true
