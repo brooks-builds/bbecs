@@ -6,6 +6,7 @@ use eyre::Result;
 use ggez::graphics::{Color, Mesh};
 
 use crate::components::{CastComponents, Component};
+use crate::errors::BbEcsError;
 use crate::{components::Components, data_types::point::Point};
 
 pub trait EntityDataTraits<T> {
@@ -43,10 +44,13 @@ impl EntityData {
 
 impl EntityDataTraits<Point> for EntityData {
     fn insert(&mut self, name: &str, data: Point) -> Result<()> {
-        let wrapped_components = self.components.get(name).unwrap();
-        let mut components = wrapped_components.borrow_mut();
-        let points = components.cast_mut()?;
-        points.push(data);
+        if let Some(wrapped_components) = self.components.get(name) {
+            let mut components = wrapped_components.borrow_mut();
+            let points = components.cast_mut()?;
+            points.push(data);
+        } else {
+            return Err(BbEcsError::NeedToRegister.into());
+        }
         Ok(())
     }
 }
