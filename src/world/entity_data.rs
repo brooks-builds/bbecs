@@ -33,6 +33,7 @@ impl EntityData {
             Component::Mesh => Components::Mesh(vec![]),
             Component::U32 => Components::U32(vec![]),
             Component::Usize => Components::Usize(vec![]),
+            Component::Bool => Components::Bool(vec![]),
         }));
         self.components.insert(name, components);
     }
@@ -96,6 +97,15 @@ impl EntityDataTraits<usize> for EntityData {
         let mut wrapped_usizes = self.components.get_mut(name).unwrap().borrow_mut();
         let usizes: &mut Vec<usize> = wrapped_usizes.cast_mut()?;
         usizes.push(data);
+        Ok(())
+    }
+}
+
+impl EntityDataTraits<bool> for EntityData {
+    fn insert(&mut self, name: &str, data: bool) -> Result<()> {
+        let mut wrapped_boolean = self.components.get_mut(name).unwrap().borrow_mut();
+        let boolean: &mut Vec<bool> = wrapped_boolean.cast_mut()?;
+        boolean.push(data);
         Ok(())
     }
 }

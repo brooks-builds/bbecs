@@ -17,6 +17,7 @@ pub enum Resource {
     U32(u32),
     F32(f32),
     Usize(usize),
+    Bool(bool),
 }
 
 impl ResourceCast<u32> for Resource {
@@ -169,6 +170,32 @@ impl ResourceCast<usize> for Resource {
             Err(BbEcsError::CastingResource {
                 from: self.clone(),
                 to: "&mut usize",
+            }
+            .into())
+        }
+    }
+}
+
+impl ResourceCast<bool> for Resource {
+    fn cast(&self) -> Result<&bool> {
+        if let Resource::Bool(boolean) = self {
+            Ok(boolean)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "boolean",
+            }
+            .into())
+        }
+    }
+
+    fn cast_mut(&mut self) -> Result<&mut bool> {
+        if let Resource::Bool(boolean) = self {
+            Ok(boolean)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "boolean",
             }
             .into())
         }

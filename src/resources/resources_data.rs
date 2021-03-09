@@ -94,3 +94,13 @@ impl ResourceDataLens<usize> for ResourcesData {
         self.resources.get_mut(name).unwrap().cast_mut()
     }
 }
+
+impl ResourceDataLens<bool> for ResourcesData {
+    fn get(&self, name: &str) -> Result<&bool> {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> Result<&mut bool> {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}

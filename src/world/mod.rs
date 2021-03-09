@@ -166,3 +166,22 @@ impl WorldMethods<usize> for World {
         self.resources.get_mut(&name.into())
     }
 }
+
+impl WorldMethods<bool> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: bool) -> Result<&mut Self> {
+        self.entity_data.insert(&name.into(), data)?;
+        Ok(self)
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: bool) {
+        self.resources.insert(name.into(), Resource::Bool(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&bool> {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut bool> {
+        self.resources.get_mut(&name.into())
+    }
+}
