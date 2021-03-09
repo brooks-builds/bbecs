@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use eyre::Result;
+use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
 
 use crate::data_types::point::Point;
@@ -101,6 +102,16 @@ impl ResourceDataLens<bool> for ResourcesData {
     }
 
     fn get_mut(&mut self, name: &str) -> Result<&mut bool> {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}
+
+impl ResourceDataLens<KeyCode> for ResourcesData {
+    fn get(&self, name: &str) -> Result<&KeyCode> {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> Result<&mut KeyCode> {
         self.resources.get_mut(name).unwrap().cast_mut()
     }
 }

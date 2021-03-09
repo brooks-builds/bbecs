@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use eyre::Result;
+use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
 
 use crate::components::{CastComponents, Component};
@@ -34,6 +35,7 @@ impl EntityData {
             Component::U32 => Components::U32(vec![]),
             Component::Usize => Components::Usize(vec![]),
             Component::Bool => Components::Bool(vec![]),
+            Component::GgezKeyCode => Components::GgezKeyCode(vec![]),
         }));
         self.components.insert(name, components);
     }
@@ -106,6 +108,15 @@ impl EntityDataTraits<bool> for EntityData {
         let mut wrapped_boolean = self.components.get_mut(name).unwrap().borrow_mut();
         let boolean: &mut Vec<bool> = wrapped_boolean.cast_mut()?;
         boolean.push(data);
+        Ok(())
+    }
+}
+
+impl EntityDataTraits<KeyCode> for EntityData {
+    fn insert(&mut self, name: &str, data: KeyCode) -> Result<()> {
+        let mut wrapped_key_code = self.components.get_mut(name).unwrap().borrow_mut();
+        let key_code: &mut Vec<KeyCode> = wrapped_key_code.cast_mut()?;
+        key_code.push(data);
         Ok(())
     }
 }

@@ -1,4 +1,5 @@
 use eyre::Result;
+use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
 
 use crate::data_types::point::Point;
@@ -18,6 +19,7 @@ pub enum Resource {
     F32(f32),
     Usize(usize),
     Bool(bool),
+    GgezKeyCode(KeyCode),
 }
 
 impl ResourceCast<u32> for Resource {
@@ -196,6 +198,32 @@ impl ResourceCast<bool> for Resource {
             Err(BbEcsError::CastingResource {
                 from: self.clone(),
                 to: "boolean",
+            }
+            .into())
+        }
+    }
+}
+
+impl ResourceCast<KeyCode> for Resource {
+    fn cast(&self) -> Result<&KeyCode> {
+        if let Resource::GgezKeyCode(key_code) = self {
+            Ok(key_code)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "key_code",
+            }
+            .into())
+        }
+    }
+
+    fn cast_mut(&mut self) -> Result<&mut KeyCode> {
+        if let Resource::GgezKeyCode(key_code) = self {
+            Ok(key_code)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "key_code",
             }
             .into())
         }

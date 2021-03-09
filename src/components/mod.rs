@@ -1,4 +1,5 @@
 use eyre::Result;
+use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
 
 use crate::data_types::point::Point;
@@ -22,6 +23,7 @@ pub enum Components {
     U32(Vec<u32>),
     Usize(Vec<usize>),
     Bool(Vec<bool>),
+    GgezKeyCode(Vec<KeyCode>),
 }
 
 impl CastComponents<Point> for Components {
@@ -213,6 +215,32 @@ impl CastComponents<bool> for Components {
     }
 }
 
+impl CastComponents<KeyCode> for Components {
+    fn cast_mut(&mut self) -> Result<&mut Vec<KeyCode>> {
+        if let Components::GgezKeyCode(value) = self {
+            Ok(value)
+        } else {
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::GgezKeyCode(vec![]),
+            }
+            .into())
+        }
+    }
+
+    fn cast(&self) -> Result<&Vec<KeyCode>> {
+        if let Components::GgezKeyCode(value) = self {
+            Ok(value)
+        } else {
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::GgezKeyCode(vec![]),
+            }
+            .into())
+        }
+    }
+}
+
 pub enum Component {
     Point,
     F32,
@@ -221,4 +249,5 @@ pub enum Component {
     U32,
     Usize,
     Bool,
+    GgezKeyCode,
 }
