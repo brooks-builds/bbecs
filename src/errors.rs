@@ -11,4 +11,6 @@ pub enum BbEcsError {
     CastingResource { from: Resource, to: &'static str },
     #[error("you need to register before inserting components")]
     NeedToRegister,
+    #[error("component with name `{0}` not found")]
+    ComponentNotFound(String),
 }

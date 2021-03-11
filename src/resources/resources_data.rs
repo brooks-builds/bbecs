@@ -115,3 +115,13 @@ impl ResourceDataLens<KeyCode> for ResourcesData {
         self.resources.get_mut(name).unwrap().cast_mut()
     }
 }
+
+impl ResourceDataLens<String> for ResourcesData {
+    fn get(&self, name: &str) -> Result<&String> {
+        self.resources.get(name).unwrap().cast()
+    }
+
+    fn get_mut(&mut self, name: &str) -> Result<&mut String> {
+        self.resources.get_mut(name).unwrap().cast_mut()
+    }
+}

@@ -20,6 +20,7 @@ pub enum Resource {
     Usize(usize),
     Bool(bool),
     GgezKeyCode(KeyCode),
+    Marker(String),
 }
 
 impl ResourceCast<u32> for Resource {
@@ -224,6 +225,32 @@ impl ResourceCast<KeyCode> for Resource {
             Err(BbEcsError::CastingResource {
                 from: self.clone(),
                 to: "key_code",
+            }
+            .into())
+        }
+    }
+}
+
+impl ResourceCast<String> for Resource {
+    fn cast(&self) -> Result<&String> {
+        if let Resource::Marker(string) = self {
+            Ok(string)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "string",
+            }
+            .into())
+        }
+    }
+
+    fn cast_mut(&mut self) -> Result<&mut String> {
+        if let Resource::Marker(string) = self {
+            Ok(string)
+        } else {
+            Err(BbEcsError::CastingResource {
+                from: self.clone(),
+                to: "string",
             }
             .into())
         }

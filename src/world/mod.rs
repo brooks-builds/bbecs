@@ -40,7 +40,7 @@ impl World {
         self
     }
 
-    pub fn query_one<S: Into<String>>(&self, name: S) -> Option<&Rc<RefCell<Components>>> {
+    pub fn query_one<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Components>>> {
         self.entity_data.query_one(&name.into())
     }
 }
@@ -207,6 +207,25 @@ impl WorldMethods<KeyCode> for World {
     }
 }
 
+impl WorldMethods<String> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: String) -> Result<&mut Self> {
+        self.entity_data.insert(&name.into(), data)?;
+        Ok(self)
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: String) {
+        self.resources.insert(name.into(), Resource::Marker(data));
+    }
+
+    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&String> {
+        self.resources.get(&name.into())
+    }
+
+    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut String> {
+        self.resources.get_mut(&name.into())
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -257,6 +276,56 @@ mod tests {
         let wrapped_keycodes = world.query_one("keycode").unwrap().borrow();
         let keycodes: &Vec<KeyCode> = wrapped_keycodes.cast()?;
         assert_eq!(keycodes[0], KeyCode::B);
+        Ok(())
+    }
+
+    #[test]
+    fn should_get_marker_resource() -> Result<()> {
+        let mut world = World::new();
+        world.add_resource("marker", "player".to_owned());
+        let marker: &String = world.get_resource("marker")?;
+        assert_eq!(*marker, "player".to_owned());
+        Ok(())
+    }
+
+    #[test]
+    fn should_get_marker_component() -> Result<()> {
+        let mut world = World::new();
+        world.register("marker", Component::Marker);
+        world
+            .spawn_entity()
+            .with_component("marker", "player".to_owned())?;
+        let wrapped_markers = world.query_one("marker").unwrap().borrow();
+        let markers: &Vec<String> = wrapped_markers.cast()?;
+        assert_eq!(markers[0], "player".to_owned());
+        Ok(())
+    }
+
+    #[test]
+    fn should_mutably_get_marker_resource() -> Result<()> {
+        let mut world = World::new();
+        world.add_resource("marker", "player".to_owned());
+        let marker: &mut String = world.get_resource_mut("marker")?;
+        *marker = "asteroid".to_owned();
+        let marker: &String = world.get_resource("marker")?;
+        assert_eq!(*marker, "asteroid".to_owned());
+        Ok(())
+    }
+
+    #[test]
+    fn should_mutably_get_marker_component() -> Result<()> {
+        let mut world = World::new();
+        world.register("marker", Component::Marker);
+        world
+            .spawn_entity()
+            .with_component("marker", "player".to_owned())?;
+        let mut wrapped_markers = world.query_one("marker").unwrap().borrow_mut();
+        let markers: &mut Vec<String> = wrapped_markers.cast_mut()?;
+        markers[0] = "asteroid".to_owned();
+        drop(wrapped_markers);
+        let wrapped_markers = world.query_one("marker").unwrap().borrow();
+        let markers: &Vec<String> = wrapped_markers.cast()?;
+        assert_eq!(markers[0], "asteroid".to_owned());
         Ok(())
     }
 }

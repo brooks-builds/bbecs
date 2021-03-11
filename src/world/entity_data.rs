@@ -36,12 +36,17 @@ impl EntityData {
             Component::Usize => Components::Usize(vec![]),
             Component::Bool => Components::Bool(vec![]),
             Component::GgezKeyCode => Components::GgezKeyCode(vec![]),
+            Component::Marker => Components::Marker(vec![]),
         }));
         self.components.insert(name, components);
     }
 
-    pub fn query_one(&self, name: &str) -> Option<&Rc<RefCell<Components>>> {
-        self.components.get(name)
+    pub fn query_one(&self, name: &str) -> Result<&Rc<RefCell<Components>>> {
+        if let Some(components) = self.components.get(name) {
+            Ok(components)
+        } else {
+            Err(BbEcsError::ComponentNotFound(name.to_owned()).into())
+        }
     }
 }
 
@@ -117,6 +122,15 @@ impl EntityDataTraits<KeyCode> for EntityData {
         let mut wrapped_key_code = self.components.get_mut(name).unwrap().borrow_mut();
         let key_code: &mut Vec<KeyCode> = wrapped_key_code.cast_mut()?;
         key_code.push(data);
+        Ok(())
+    }
+}
+
+impl EntityDataTraits<String> for EntityData {
+    fn insert(&mut self, name: &str, data: String) -> Result<()> {
+        let mut wrapped_marker = self.components.get_mut(name).unwrap().borrow_mut();
+        let markers: &mut Vec<String> = wrapped_marker.cast_mut()?;
+        markers.push(data);
         Ok(())
     }
 }

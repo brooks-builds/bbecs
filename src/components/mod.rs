@@ -24,6 +24,7 @@ pub enum Components {
     Usize(Vec<usize>),
     Bool(Vec<bool>),
     GgezKeyCode(Vec<KeyCode>),
+    Marker(Vec<String>),
 }
 
 impl CastComponents<Point> for Components {
@@ -241,6 +242,31 @@ impl CastComponents<KeyCode> for Components {
     }
 }
 
+impl CastComponents<String> for Components {
+    fn cast_mut(&mut self) -> Result<&mut Vec<String>> {
+        if let Components::Marker(string) = self {
+            Ok(string)
+        } else {
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Marker(vec![]),
+            }
+            .into())
+        }
+    }
+
+    fn cast(&self) -> Result<&Vec<String>> {
+        if let Components::Marker(string) = self {
+            Ok(string)
+        } else {
+            Err(BbEcsError::CastingComponents {
+                from: self.clone(),
+                to: Components::Marker(vec![]),
+            }
+            .into())
+        }
+    }
+}
 pub enum Component {
     Point,
     F32,
@@ -250,4 +276,5 @@ pub enum Component {
     Usize,
     Bool,
     GgezKeyCode,
+    Marker,
 }
