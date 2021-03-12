@@ -1,20 +1,15 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use eyre::Result;
-use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh};
 
-use crate::data_types::point::Point;
+use crate::errors::BbEcsError;
 
-use super::resource::{Resource, ResourceCast};
-
-pub trait ResourceDataLens<T> {
-    fn get(&self, name: &str) -> Result<&T>;
-    fn get_mut(&mut self, name: &str) -> Result<&mut T>;
-}
+use super::resource::Resource;
 
 pub struct ResourcesData {
-    resources: HashMap<String, Resource>,
+    resources: HashMap<String, Rc<RefCell<Resource>>>,
 }
 
 impl ResourcesData {
@@ -24,7 +19,15 @@ impl ResourcesData {
 
     /// Inserts a resource into storage, overwriting any resource that had the same name
     pub fn insert(&mut self, name: String, resource: Resource) {
-        self.resources.insert(name, resource);
+        self.resources.insert(name, Rc::new(RefCell::new(resource)));
+    }
+
+    pub fn get(&self, name: &str) -> Result<&Rc<RefCell<Resource>>> {
+        if let Some(resource) = self.resources.get(name) {
+            Ok(resource)
+        } else {
+            Err(BbEcsError::ResourceNotFound(name.to_owned()).into())
+        }
     }
 }
 
@@ -33,95 +36,5 @@ impl Default for ResourcesData {
         Self {
             resources: HashMap::new(),
         }
-    }
-}
-
-impl ResourceDataLens<Point> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&Point> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut Point> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<Color> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&Color> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut Color> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<Mesh> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&Mesh> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut Mesh> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<u32> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&u32> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut u32> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<f32> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&f32> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut f32> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<usize> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&usize> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut usize> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<bool> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&bool> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut bool> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<KeyCode> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&KeyCode> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut KeyCode> {
-        self.resources.get_mut(name).unwrap().cast_mut()
-    }
-}
-
-impl ResourceDataLens<String> for ResourcesData {
-    fn get(&self, name: &str) -> Result<&String> {
-        self.resources.get(name).unwrap().cast()
-    }
-
-    fn get_mut(&mut self, name: &str) -> Result<&mut String> {
-        self.resources.get_mut(name).unwrap().cast_mut()
     }
 }
