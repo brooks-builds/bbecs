@@ -8,12 +8,14 @@ use eyre::Result;
 use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
 
-use crate::components::{Component, Components};
+use crate::components::{CastComponents, Component, Components};
 use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
 use crate::resources::resources_data::ResourcesData;
 
 use self::entity_data::EntityDataTraits;
+
+const TO_BE_DELETED: &str = "to be deleted";
 
 pub trait WorldMethods<T> {
     fn with_component<S: Into<String>>(&mut self, name: S, data: T) -> Result<&mut Self>;
@@ -34,8 +36,11 @@ impl World {
         self.entity_data.register(name.into(), component_type);
     }
 
-    pub fn spawn_entity(&mut self) -> &mut Self {
-        self
+    pub fn spawn_entity(&mut self) -> Result<&mut Self> {
+        self.entity_data
+            .register(TO_BE_DELETED.into(), Component::Bool);
+        self.entity_data.insert(TO_BE_DELETED, false)?;
+        Ok(self)
     }
 
     pub fn query_one<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Components>>> {
@@ -47,7 +52,33 @@ impl World {
     }
 
     pub fn delete_entity_by_index(&self, index: usize) -> Result<()> {
-        self.entity_data.delete_by_index(index)
+        let mut wrapped_to_be_deleted = self.entity_data.query_one(TO_BE_DELETED)?.borrow_mut();
+        let to_be_deleted: &mut Vec<bool> = wrapped_to_be_deleted.cast_mut()?;
+
+        to_be_deleted[index] = true;
+
+        Ok(())
+    }
+
+    pub fn update(&self) -> Result<()> {
+        let wrapped_to_be_deleted = self.entity_data.query_one(TO_BE_DELETED)?.borrow();
+        let to_be_deleted: &Vec<bool> = wrapped_to_be_deleted.cast()?;
+        let mut indexes_to_delete =
+            to_be_deleted
+                .iter()
+                .enumerate()
+                .fold(vec![], |mut indexes, (index, is_deleted)| {
+                    if *is_deleted {
+                        indexes.push(index);
+                    }
+                    indexes
+                });
+        drop(wrapped_to_be_deleted);
+
+        indexes_to_delete.reverse();
+        indexes_to_delete
+            .into_iter()
+            .try_for_each(|index| self.entity_data.delete_by_index(index))
     }
 }
 
@@ -183,7 +214,9 @@ mod tests {
     fn should_get_key_code_component() -> Result<()> {
         let mut world = World::new();
         world.register("keycode", Component::GgezKeyCode);
-        world.spawn_entity().with_component("keycode", KeyCode::A)?;
+        world
+            .spawn_entity()?
+            .with_component("keycode", KeyCode::A)?;
         let wrapped_keycodes = world.query_one("keycode").unwrap().borrow();
         let keycodes: &Vec<KeyCode> = wrapped_keycodes.cast()?;
         assert_eq!(keycodes[0], KeyCode::A);
@@ -206,7 +239,9 @@ mod tests {
     fn should_mutably_get_key_code_component() -> Result<()> {
         let mut world = World::new();
         world.register("keycode", Component::GgezKeyCode);
-        world.spawn_entity().with_component("keycode", KeyCode::A)?;
+        world
+            .spawn_entity()?
+            .with_component("keycode", KeyCode::A)?;
         let mut wrapped_keycodes = world.query_one("keycode").unwrap().borrow_mut();
         let keycodes: &mut Vec<KeyCode> = wrapped_keycodes.cast_mut()?;
         keycodes[0] = KeyCode::B;
@@ -232,7 +267,7 @@ mod tests {
         let mut world = World::new();
         world.register("marker", Component::Marker);
         world
-            .spawn_entity()
+            .spawn_entity()?
             .with_component("marker", "player".to_owned())?;
         let wrapped_markers = world.query_one("marker").unwrap().borrow();
         let markers: &Vec<String> = wrapped_markers.cast()?;
@@ -257,7 +292,7 @@ mod tests {
         let mut world = World::new();
         world.register("marker", Component::Marker);
         world
-            .spawn_entity()
+            .spawn_entity()?
             .with_component("marker", "player".to_owned())?;
         let mut wrapped_markers = world.query_one("marker").unwrap().borrow_mut();
         let markers: &mut Vec<String> = wrapped_markers.cast_mut()?;
@@ -276,14 +311,16 @@ mod tests {
         world.register("location", Component::Point);
         world.register("name", Component::Marker);
         world
-            .spawn_entity()
+            .spawn_entity()?
             .with_component("location", Point::new(0.0, 0.0))?
             .with_component("name", "Player".to_owned())?;
         world
-            .spawn_entity()
+            .spawn_entity()?
             .with_component("location", Point::new(10.0, 10.0))?
             .with_component("name", "asteroid".to_owned())?;
         world.delete_entity_by_index(0)?;
+
+        world.update()?;
 
         let wrapped_names = world.query_one("name")?.borrow();
         let names: &Vec<String> = wrapped_names.cast()?;

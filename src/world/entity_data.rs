@@ -54,7 +54,9 @@ impl EntityData {
             .iter()
             .try_for_each(|(_name, wrapped_component)| {
                 let mut borrowed_component = wrapped_component.borrow_mut();
-                borrowed_component.delete_by_index(index)
+                borrowed_component.delete_by_index(index)?;
+                drop(borrowed_component);
+                Ok(())
             })
     }
 }
