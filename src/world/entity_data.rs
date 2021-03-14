@@ -48,6 +48,15 @@ impl EntityData {
             Err(BbEcsError::ComponentNotFound(name.to_owned()).into())
         }
     }
+
+    pub fn delete_by_index(&self, index: usize) -> Result<()> {
+        self.components
+            .iter()
+            .try_for_each(|(_name, wrapped_component)| {
+                let mut borrowed_component = wrapped_component.borrow_mut();
+                borrowed_component.delete_by_index(index)
+            })
+    }
 }
 
 impl EntityDataTraits<Point> for EntityData {

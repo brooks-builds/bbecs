@@ -45,6 +45,10 @@ impl World {
     pub fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Resource>>> {
         self.resources.get(&name.into())
     }
+
+    pub fn delete_entity_by_index(&self, index: usize) -> Result<()> {
+        self.entity_data.delete_by_index(index)
+    }
 }
 
 impl Default for World {
@@ -161,6 +165,7 @@ mod tests {
 
     use super::{Component, Result, World, WorldMethods};
     use crate::components::CastComponents;
+    use crate::data_types::point::Point;
     use crate::resources::resource::ResourceCast;
     use ggez::event::KeyCode;
 
@@ -261,6 +266,30 @@ mod tests {
         let wrapped_markers = world.query_one("marker").unwrap().borrow();
         let markers: &Vec<String> = wrapped_markers.cast()?;
         assert_eq!(markers[0], "asteroid".to_owned());
+        Ok(())
+    }
+
+    // delete entity tests
+    #[test]
+    fn should_be_able_to_delete_an_entity_by_index() -> Result<()> {
+        let mut world = World::new();
+        world.register("location", Component::Point);
+        world.register("name", Component::Marker);
+        world
+            .spawn_entity()
+            .with_component("location", Point::new(0.0, 0.0))?
+            .with_component("name", "Player".to_owned())?;
+        world
+            .spawn_entity()
+            .with_component("location", Point::new(10.0, 10.0))?
+            .with_component("name", "asteroid".to_owned())?;
+        world.delete_entity_by_index(0)?;
+
+        let wrapped_names = world.query_one("name")?.borrow();
+        let names: &Vec<String> = wrapped_names.cast()?;
+
+        assert_eq!(names.len(), 1);
+        assert_eq!(names[0], "asteroid");
         Ok(())
     }
 }

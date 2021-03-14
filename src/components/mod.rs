@@ -27,6 +27,41 @@ pub enum Components {
     Marker(Vec<String>),
 }
 
+impl Components {
+    pub fn delete_by_index(&mut self, index: usize) -> Result<()> {
+        match self {
+            Components::Point(data) => {
+                data.remove(index);
+            }
+            Components::F32(data) => {
+                data.remove(index);
+            }
+            Components::Color(data) => {
+                data.remove(index);
+            }
+            Components::Mesh(data) => {
+                data.remove(index);
+            }
+            Components::U32(data) => {
+                data.remove(index);
+            }
+            Components::Usize(data) => {
+                data.remove(index);
+            }
+            Components::Bool(data) => {
+                data.remove(index);
+            }
+            Components::GgezKeyCode(data) => {
+                data.remove(index);
+            }
+            Components::Marker(data) => {
+                data.remove(index);
+            }
+        };
+        Ok(())
+    }
+}
+
 impl CastComponents<Point> for Components {
     /// Cast the components to it's contained data as long as it is really a point.
     /// ```
