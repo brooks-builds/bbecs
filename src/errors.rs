@@ -13,4 +13,6 @@ pub enum BbEcsError {
     NeedToRegister,
     #[error("component with name `{0}` not found")]
     ComponentNotFound(String),
+    #[error("resource with names `{0} not found")]
+    ResourceNotFound(String),
 }

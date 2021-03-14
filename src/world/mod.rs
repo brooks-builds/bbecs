@@ -11,15 +11,13 @@ use ggez::graphics::{Color, Mesh};
 use crate::components::{Component, Components};
 use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
-use crate::resources::resources_data::{ResourceDataLens, ResourcesData};
+use crate::resources::resources_data::ResourcesData;
 
 use self::entity_data::EntityDataTraits;
 
 pub trait WorldMethods<T> {
     fn with_component<S: Into<String>>(&mut self, name: S, data: T) -> Result<&mut Self>;
     fn add_resource<S: Into<String>>(&mut self, name: S, data: T);
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&T>;
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut T>;
 }
 
 pub struct World {
@@ -43,6 +41,10 @@ impl World {
     pub fn query_one<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Components>>> {
         self.entity_data.query_one(&name.into())
     }
+
+    pub fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Resource>>> {
+        self.resources.get(&name.into())
+    }
 }
 
 impl Default for World {
@@ -63,14 +65,6 @@ impl WorldMethods<Point> for World {
     fn add_resource<S: Into<String>>(&mut self, name: S, data: Point) {
         self.resources.insert(name.into(), Resource::Point(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Point> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut Point> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 impl WorldMethods<Color> for World {
@@ -81,14 +75,6 @@ impl WorldMethods<Color> for World {
 
     fn add_resource<S: Into<String>>(&mut self, name: S, data: Color) {
         self.resources.insert(name.into(), Resource::Color(data));
-    }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Color> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut Color> {
-        self.resources.get_mut(&name.into())
     }
 }
 
@@ -101,14 +87,6 @@ impl WorldMethods<Mesh> for World {
     fn add_resource<S: Into<String>>(&mut self, name: S, data: Mesh) {
         self.resources.insert(name.into(), Resource::Mesh(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Mesh> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut Mesh> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 impl WorldMethods<u32> for World {
@@ -119,14 +97,6 @@ impl WorldMethods<u32> for World {
 
     fn add_resource<S: Into<String>>(&mut self, name: S, data: u32) {
         self.resources.insert(name.into(), Resource::U32(data));
-    }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&u32> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut u32> {
-        self.resources.get_mut(&name.into())
     }
 }
 
@@ -139,14 +109,6 @@ impl WorldMethods<f32> for World {
     fn add_resource<S: Into<String>>(&mut self, name: S, data: f32) {
         self.resources.insert(name.into(), Resource::F32(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&f32> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut f32> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 impl WorldMethods<usize> for World {
@@ -158,14 +120,6 @@ impl WorldMethods<usize> for World {
     fn add_resource<S: Into<String>>(&mut self, name: S, data: usize) {
         self.resources.insert(name.into(), Resource::Usize(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&usize> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut usize> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 impl WorldMethods<bool> for World {
@@ -176,14 +130,6 @@ impl WorldMethods<bool> for World {
 
     fn add_resource<S: Into<String>>(&mut self, name: S, data: bool) {
         self.resources.insert(name.into(), Resource::Bool(data));
-    }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&bool> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut bool> {
-        self.resources.get_mut(&name.into())
     }
 }
 
@@ -197,14 +143,6 @@ impl WorldMethods<KeyCode> for World {
         self.resources
             .insert(name.into(), Resource::GgezKeyCode(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&KeyCode> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut KeyCode> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 impl WorldMethods<String> for World {
@@ -216,14 +154,6 @@ impl WorldMethods<String> for World {
     fn add_resource<S: Into<String>>(&mut self, name: S, data: String) {
         self.resources.insert(name.into(), Resource::Marker(data));
     }
-
-    fn get_resource<S: Into<String>>(&self, name: S) -> Result<&String> {
-        self.resources.get(&name.into())
-    }
-
-    fn get_resource_mut<S: Into<String>>(&mut self, name: S) -> Result<&mut String> {
-        self.resources.get_mut(&name.into())
-    }
 }
 
 #[cfg(test)]
@@ -231,13 +161,15 @@ mod tests {
 
     use super::{Component, Result, World, WorldMethods};
     use crate::components::CastComponents;
+    use crate::resources::resource::ResourceCast;
     use ggez::event::KeyCode;
 
     #[test]
     fn should_get_key_code_resource() -> Result<()> {
         let mut world = World::new();
         world.add_resource("keycode", KeyCode::A);
-        let keycode: &KeyCode = world.get_resource("keycode")?;
+        let wrapped_keycode = world.get_resource("keycode")?.borrow();
+        let keycode: &KeyCode = wrapped_keycode.cast()?;
         assert_eq!(*keycode, KeyCode::A);
         Ok(())
     }
@@ -257,9 +189,10 @@ mod tests {
     fn should_mutably_get_key_code_resource() -> Result<()> {
         let mut world = World::new();
         world.add_resource("keycode", KeyCode::A);
-        let keycode: &mut KeyCode = world.get_resource_mut("keycode")?;
+        let mut wrapped_keycode = world.get_resource("keycode")?.borrow_mut();
+        let keycode: &mut KeyCode = wrapped_keycode.cast_mut()?;
         *keycode = KeyCode::B;
-        let keycode: &KeyCode = world.get_resource("keycode")?;
+        let keycode: &KeyCode = wrapped_keycode.cast()?;
         assert_eq!(*keycode, KeyCode::B);
         Ok(())
     }
@@ -283,7 +216,8 @@ mod tests {
     fn should_get_marker_resource() -> Result<()> {
         let mut world = World::new();
         world.add_resource("marker", "player".to_owned());
-        let marker: &String = world.get_resource("marker")?;
+        let wrapped_marker = world.get_resource("marker")?.borrow();
+        let marker: &String = wrapped_marker.cast()?;
         assert_eq!(*marker, "player".to_owned());
         Ok(())
     }
@@ -305,9 +239,10 @@ mod tests {
     fn should_mutably_get_marker_resource() -> Result<()> {
         let mut world = World::new();
         world.add_resource("marker", "player".to_owned());
-        let marker: &mut String = world.get_resource_mut("marker")?;
+        let mut wrapped_marker = world.get_resource("marker")?.borrow_mut();
+        let marker: &mut String = wrapped_marker.cast_mut()?;
         *marker = "asteroid".to_owned();
-        let marker: &String = world.get_resource("marker")?;
+        let marker: &String = wrapped_marker.cast()?;
         assert_eq!(*marker, "asteroid".to_owned());
         Ok(())
     }
