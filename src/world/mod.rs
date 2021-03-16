@@ -7,6 +7,7 @@ use entity_data::EntityData;
 use eyre::Result;
 use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
+use ggez::nalgebra::Scalar;
 
 use crate::components::{CastComponents, Component, Components};
 use crate::data_types::point::Point;
@@ -25,6 +26,7 @@ pub trait WorldMethods<T> {
 pub struct World {
     pub entity_data: EntityData,
     resources: ResourcesData,
+    is_empty: bool,
 }
 
 impl World {
@@ -40,6 +42,7 @@ impl World {
         self.entity_data
             .register(TO_BE_DELETED.into(), Component::Bool);
         self.entity_data.insert(TO_BE_DELETED, false)?;
+        self.is_empty = false;
         Ok(self)
     }
 
@@ -61,6 +64,10 @@ impl World {
     }
 
     pub fn update(&self) -> Result<()> {
+        if self.is_empty {
+            return Ok(());
+        }
+
         let wrapped_to_be_deleted = self.entity_data.query_one(TO_BE_DELETED)?.borrow();
         let to_be_deleted: &Vec<bool> = wrapped_to_be_deleted.cast()?;
         let mut indexes_to_delete =
@@ -87,6 +94,7 @@ impl Default for World {
         Self {
             entity_data: EntityData::new(),
             resources: ResourcesData::new(),
+            is_empty: true,
         }
     }
 }
