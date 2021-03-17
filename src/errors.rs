@@ -15,4 +15,6 @@ pub enum BbEcsError {
     ComponentNotFound(String),
     #[error("resource with names `{0} not found")]
     ResourceNotFound(String),
+    #[error("already registered component with name `{0}`")]
+    ComponentAlreadyRegistered(String),
 }

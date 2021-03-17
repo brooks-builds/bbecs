@@ -7,7 +7,6 @@ use entity_data::EntityData;
 use eyre::Result;
 use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh};
-use ggez::nalgebra::Scalar;
 
 use crate::components::{CastComponents, Component, Components};
 use crate::data_types::point::Point;
@@ -34,15 +33,17 @@ impl World {
         Self::default()
     }
 
-    pub fn register<S: Into<String>>(&mut self, name: S, component_type: Component) {
-        self.entity_data.register(name.into(), component_type);
+    pub fn register<S: Into<String>>(&mut self, name: S, component_type: Component) -> Result<()> {
+        self.entity_data.register(name.into(), component_type)
     }
 
     pub fn spawn_entity(&mut self) -> Result<&mut Self> {
-        self.entity_data
-            .register(TO_BE_DELETED.into(), Component::Bool);
+        if self.is_empty {
+            self.entity_data
+                .register(TO_BE_DELETED.into(), Component::Bool)?;
+            self.is_empty = false;
+        }
         self.entity_data.insert(TO_BE_DELETED, false)?;
-        self.is_empty = false;
         Ok(self)
     }
 
@@ -57,7 +58,6 @@ impl World {
     pub fn delete_entity_by_index(&self, index: usize) -> Result<()> {
         let mut wrapped_to_be_deleted = self.entity_data.query_one(TO_BE_DELETED)?.borrow_mut();
         let to_be_deleted: &mut Vec<bool> = wrapped_to_be_deleted.cast_mut()?;
-
         to_be_deleted[index] = true;
 
         Ok(())
@@ -221,7 +221,7 @@ mod tests {
     #[test]
     fn should_get_key_code_component() -> Result<()> {
         let mut world = World::new();
-        world.register("keycode", Component::GgezKeyCode);
+        world.register("keycode", Component::GgezKeyCode)?;
         world
             .spawn_entity()?
             .with_component("keycode", KeyCode::A)?;
@@ -246,7 +246,7 @@ mod tests {
     #[test]
     fn should_mutably_get_key_code_component() -> Result<()> {
         let mut world = World::new();
-        world.register("keycode", Component::GgezKeyCode);
+        world.register("keycode", Component::GgezKeyCode)?;
         world
             .spawn_entity()?
             .with_component("keycode", KeyCode::A)?;
@@ -273,7 +273,7 @@ mod tests {
     #[test]
     fn should_get_marker_component() -> Result<()> {
         let mut world = World::new();
-        world.register("marker", Component::Marker);
+        world.register("marker", Component::Marker)?;
         world
             .spawn_entity()?
             .with_component("marker", "player".to_owned())?;
@@ -298,7 +298,7 @@ mod tests {
     #[test]
     fn should_mutably_get_marker_component() -> Result<()> {
         let mut world = World::new();
-        world.register("marker", Component::Marker);
+        world.register("marker", Component::Marker)?;
         world
             .spawn_entity()?
             .with_component("marker", "player".to_owned())?;
@@ -316,8 +316,8 @@ mod tests {
     #[test]
     fn should_be_able_to_delete_an_entity_by_index() -> Result<()> {
         let mut world = World::new();
-        world.register("location", Component::Point);
-        world.register("name", Component::Marker);
+        world.register("location", Component::Point)?;
+        world.register("name", Component::Marker)?;
         world
             .spawn_entity()?
             .with_component("location", Point::new(0.0, 0.0))?
@@ -335,6 +335,36 @@ mod tests {
 
         assert_eq!(names.len(), 1);
         assert_eq!(names[0], "asteroid");
+        Ok(())
+    }
+
+    #[test]
+    fn should_be_able_to_delete_all_entities() -> Result<()> {
+        let mut world = World::new();
+
+        world.register("name", Component::Marker)?;
+
+        world
+            .spawn_entity()?
+            .with_component("name", "first".to_owned())?;
+        world
+            .spawn_entity()?
+            .with_component("name", "second".to_owned())?;
+        world
+            .spawn_entity()?
+            .with_component("name", "third".to_owned())?;
+
+        world.delete_entity_by_index(0)?;
+        world.delete_entity_by_index(1)?;
+        world.delete_entity_by_index(2)?;
+
+        world.update()?;
+
+        let wrapped_names = world.query_one("name")?.borrow();
+        let names: &Vec<String> = wrapped_names.cast()?;
+
+        assert_eq!(names.len(), 0);
+
         Ok(())
     }
 }

@@ -26,7 +26,11 @@ impl EntityData {
         }
     }
 
-    pub fn register(&mut self, name: String, component_type: Component) {
+    pub fn register(&mut self, name: String, component_type: Component) -> Result<()> {
+        if self.components.contains_key(&name) {
+            return Err(BbEcsError::ComponentAlreadyRegistered(name).into());
+        }
+
         let components = Rc::new(RefCell::new(match component_type {
             Component::Point => Components::Point(vec![]),
             Component::F32 => Components::F32(vec![]),
@@ -39,6 +43,7 @@ impl EntityData {
             Component::Marker => Components::Marker(vec![]),
         }));
         self.components.insert(name, components);
+        Ok(())
     }
 
     pub fn query_one(&self, name: &str) -> Result<&Rc<RefCell<Components>>> {
