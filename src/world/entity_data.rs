@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use eyre::Result;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh};
+use ggez::graphics::{Color, Mesh, Text};
 
 use crate::components::{CastComponents, Component};
 use crate::errors::BbEcsError;
@@ -41,6 +41,7 @@ impl EntityData {
             Component::Bool => Components::Bool(vec![]),
             Component::GgezKeyCode => Components::GgezKeyCode(vec![]),
             Component::Marker => Components::Marker(vec![]),
+            Component::GgezText => Components::GgezText(vec![]),
         }));
         self.components.insert(name, components);
         Ok(())
@@ -147,6 +148,15 @@ impl EntityDataTraits<String> for EntityData {
         let mut wrapped_marker = self.components.get_mut(name).unwrap().borrow_mut();
         let markers: &mut Vec<String> = wrapped_marker.cast_mut()?;
         markers.push(data);
+        Ok(())
+    }
+}
+
+impl EntityDataTraits<Text> for EntityData {
+    fn insert(&mut self, name: &str, data: Text) -> Result<()> {
+        let mut wrapped_texts = self.components.get_mut(name).unwrap().borrow_mut();
+        let texts: &mut Vec<Text> = wrapped_texts.cast_mut()?;
+        texts.push(data);
         Ok(())
     }
 }

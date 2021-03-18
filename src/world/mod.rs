@@ -6,7 +6,7 @@ use std::rc::Rc;
 use entity_data::EntityData;
 use eyre::Result;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh};
+use ggez::graphics::{Color, Mesh, Text};
 
 use crate::components::{CastComponents, Component, Components};
 use crate::data_types::point::Point;
@@ -199,6 +199,17 @@ impl WorldMethods<String> for World {
     }
 }
 
+impl WorldMethods<Text> for World {
+    fn with_component<S: Into<String>>(&mut self, name: S, data: Text) -> Result<&mut Self> {
+        self.entity_data.insert(&name.into(), data)?;
+        Ok(self)
+    }
+
+    fn add_resource<S: Into<String>>(&mut self, name: S, data: Text) {
+        self.resources.insert(name.into(), Resource::GgezText(data));
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -365,6 +376,66 @@ mod tests {
 
         assert_eq!(names.len(), 0);
 
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod testing_text {
+    use super::{Component, Result, World, WorldMethods};
+    use crate::components::CastComponents;
+    use crate::resources::resource::ResourceCast;
+    use ggez::graphics::Text;
+
+    #[test]
+    fn should_get_text_resource() -> Result<()> {
+        let mut world = World::new();
+        world.add_resource("text", Text::new("this is a text"));
+        let wrapper_text = world.get_resource("text")?.borrow();
+        let text: &Text = wrapper_text.cast()?;
+        assert_eq!(text.contents(), "this is a text");
+        Ok(())
+    }
+
+    #[test]
+    fn should_get_text_component() -> Result<()> {
+        let mut world = World::new();
+        world.register("text", Component::GgezText)?;
+        world
+            .spawn_entity()?
+            .with_component("text", Text::new("texting"))?;
+        let wrapper_texts = world.query_one("text").unwrap().borrow();
+        let texts: &Vec<Text> = wrapper_texts.cast()?;
+        assert_eq!(texts[0].contents(), "texting");
+        Ok(())
+    }
+
+    #[test]
+    fn should_mutably_get_text_resource() -> Result<()> {
+        let mut world = World::new();
+        world.add_resource("text", Text::new("tt"));
+        let mut wrapper_text = world.get_resource("text")?.borrow_mut();
+        let text: &mut Text = wrapper_text.cast_mut()?;
+        *text = Text::new("other text");
+        let text: &Text = wrapper_text.cast()?;
+        assert_eq!(text.contents(), "other text");
+        Ok(())
+    }
+
+    #[test]
+    fn should_mutably_get_text_component() -> Result<()> {
+        let mut world = World::new();
+        world.register("text", Component::GgezText)?;
+        world
+            .spawn_entity()?
+            .with_component("text", Text::new("meow"))?;
+        let mut wrapper_texts = world.query_one("text").unwrap().borrow_mut();
+        let texts: &mut Vec<Text> = wrapper_texts.cast_mut()?;
+        texts[0] = Text::new("bark");
+        drop(wrapper_texts);
+        let wrapper_texts = world.query_one("text").unwrap().borrow();
+        let texts: &Vec<Text> = wrapper_texts.cast()?;
+        assert_eq!(texts[0].contents(), "bark");
         Ok(())
     }
 }

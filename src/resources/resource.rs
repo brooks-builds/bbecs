@@ -1,6 +1,6 @@
 use eyre::Result;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh};
+use ggez::graphics::{Color, Mesh, Text};
 
 use crate::data_types::point::Point;
 use crate::errors::BbEcsError;
@@ -21,6 +21,7 @@ pub enum Resource {
     Bool(bool),
     GgezKeyCode(KeyCode),
     Marker(String),
+    GgezText(Text),
 }
 
 impl ResourceCast<u32> for Resource {
@@ -28,11 +29,7 @@ impl ResourceCast<u32> for Resource {
         if let Resource::U32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&u32",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&u32").into())
         }
     }
 
@@ -40,11 +37,7 @@ impl ResourceCast<u32> for Resource {
         if let Resource::U32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut u32",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut u32").into())
         }
     }
 }
@@ -54,11 +47,7 @@ impl ResourceCast<Point> for Resource {
         if let Resource::Point(point) = self {
             Ok(point)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&point",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&point").into())
         }
     }
 
@@ -66,11 +55,7 @@ impl ResourceCast<Point> for Resource {
         if let Resource::Point(point) = self {
             Ok(point)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut point",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut point").into())
         }
     }
 }
@@ -80,11 +65,7 @@ impl ResourceCast<Color> for Resource {
         if let Resource::Color(color) = self {
             Ok(color)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&color",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&color").into())
         }
     }
 
@@ -92,11 +73,7 @@ impl ResourceCast<Color> for Resource {
         if let Resource::Color(color) = self {
             Ok(color)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut color",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut color").into())
         }
     }
 }
@@ -106,11 +83,7 @@ impl ResourceCast<Mesh> for Resource {
         if let Resource::Mesh(mesh) = self {
             Ok(mesh)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mesh",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mesh").into())
         }
     }
 
@@ -118,11 +91,7 @@ impl ResourceCast<Mesh> for Resource {
         if let Resource::Mesh(mesh) = self {
             Ok(mesh)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut mesh",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut mesh").into())
         }
     }
 }
@@ -132,11 +101,7 @@ impl ResourceCast<f32> for Resource {
         if let Resource::F32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&f32",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&f32").into())
         }
     }
 
@@ -144,11 +109,7 @@ impl ResourceCast<f32> for Resource {
         if let Resource::F32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut f32",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut f32").into())
         }
     }
 }
@@ -158,11 +119,7 @@ impl ResourceCast<usize> for Resource {
         if let Resource::Usize(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&usize",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&usize").into())
         }
     }
 
@@ -170,11 +127,7 @@ impl ResourceCast<usize> for Resource {
         if let Resource::Usize(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "&mut usize",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("&mut usize").into())
         }
     }
 }
@@ -184,11 +137,7 @@ impl ResourceCast<bool> for Resource {
         if let Resource::Bool(boolean) = self {
             Ok(boolean)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "boolean",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("boolean").into())
         }
     }
 
@@ -196,11 +145,7 @@ impl ResourceCast<bool> for Resource {
         if let Resource::Bool(boolean) = self {
             Ok(boolean)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "boolean",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("boolean").into())
         }
     }
 }
@@ -210,11 +155,7 @@ impl ResourceCast<KeyCode> for Resource {
         if let Resource::GgezKeyCode(key_code) = self {
             Ok(key_code)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "key_code",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("key_code").into())
         }
     }
 
@@ -222,11 +163,7 @@ impl ResourceCast<KeyCode> for Resource {
         if let Resource::GgezKeyCode(key_code) = self {
             Ok(key_code)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "key_code",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("key_code").into())
         }
     }
 }
@@ -236,11 +173,7 @@ impl ResourceCast<String> for Resource {
         if let Resource::Marker(string) = self {
             Ok(string)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "string",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("string").into())
         }
     }
 
@@ -248,11 +181,25 @@ impl ResourceCast<String> for Resource {
         if let Resource::Marker(string) = self {
             Ok(string)
         } else {
-            Err(BbEcsError::CastingResource {
-                from: self.clone(),
-                to: "string",
-            }
-            .into())
+            Err(BbEcsError::CastingResource("string").into())
+        }
+    }
+}
+
+impl ResourceCast<Text> for Resource {
+    fn cast(&self) -> Result<&Text> {
+        if let Resource::GgezText(ggez_text) = self {
+            Ok(ggez_text)
+        } else {
+            Err(BbEcsError::CastingResource("ggez_text").into())
+        }
+    }
+
+    fn cast_mut(&mut self) -> Result<&mut Text> {
+        if let Resource::GgezText(ggez_text) = self {
+            Ok(ggez_text)
+        } else {
+            Err(BbEcsError::CastingResource("ggez_text").into())
         }
     }
 }

@@ -3,7 +3,7 @@ use std::ops::{AddAssign, Div, Sub};
 
 /// Point that stores a f32 x and y with methods for manipulating the point. Uses Vector math
 /// for the methods
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -92,6 +92,12 @@ impl Point {
 
     pub fn rotation(&self) -> f32 {
         self.y.atan2(self.x)
+    }
+}
+
+impl Default for Point {
+    fn default() -> Self {
+        Self { x: 0.0, y: 0.0 }
     }
 }
 

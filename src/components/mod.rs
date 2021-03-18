@@ -1,6 +1,6 @@
 use eyre::Result;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh};
+use ggez::graphics::{Color, Mesh, Text};
 
 use crate::data_types::point::Point;
 use crate::errors::BbEcsError;
@@ -25,6 +25,7 @@ pub enum Components {
     Bool(Vec<bool>),
     GgezKeyCode(Vec<KeyCode>),
     Marker(Vec<String>),
+    GgezText(Vec<Text>),
 }
 
 impl Components {
@@ -75,6 +76,11 @@ impl Components {
                     data.remove(index);
                 }
             }
+            Components::GgezText(data) => {
+                if index < data.len() {
+                    data.remove(index);
+                }
+            }
         };
         Ok(())
     }
@@ -92,11 +98,7 @@ impl CastComponents<Point> for Components {
         if let Components::Point(points) = self {
             Ok(points)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Point(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Point").into())
         }
     }
 
@@ -104,11 +106,7 @@ impl CastComponents<Point> for Components {
         if let Components::Point(points) = self {
             Ok(points)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Point(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Point").into())
         }
     }
 }
@@ -118,11 +116,7 @@ impl CastComponents<f32> for Components {
         if let Components::F32(numbers) = self {
             Ok(numbers)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::F32(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("F32").into())
         }
     }
 
@@ -130,11 +124,7 @@ impl CastComponents<f32> for Components {
         if let Components::F32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::F32(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("F32").into())
         }
     }
 }
@@ -144,11 +134,7 @@ impl CastComponents<Color> for Components {
         if let Components::Color(color) = self {
             Ok(color)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Color(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Color").into())
         }
     }
 
@@ -156,11 +142,7 @@ impl CastComponents<Color> for Components {
         if let Components::Color(color) = self {
             Ok(color)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Color(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Color").into())
         }
     }
 }
@@ -170,11 +152,7 @@ impl CastComponents<Mesh> for Components {
         if let Components::Mesh(mesh) = self {
             Ok(mesh)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Mesh(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Mesh").into())
         }
     }
 
@@ -182,11 +160,7 @@ impl CastComponents<Mesh> for Components {
         if let Components::Mesh(mesh) = self {
             Ok(mesh)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Mesh(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Mesh").into())
         }
     }
 }
@@ -196,11 +170,7 @@ impl CastComponents<u32> for Components {
         if let Components::U32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::U32(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("U32").into())
         }
     }
 
@@ -208,11 +178,7 @@ impl CastComponents<u32> for Components {
         if let Components::U32(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::U32(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("U32").into())
         }
     }
 }
@@ -222,11 +188,7 @@ impl CastComponents<usize> for Components {
         if let Components::Usize(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Usize(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Usize").into())
         }
     }
 
@@ -234,11 +196,7 @@ impl CastComponents<usize> for Components {
         if let Components::Usize(number) = self {
             Ok(number)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Usize(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Usize").into())
         }
     }
 }
@@ -248,11 +206,7 @@ impl CastComponents<bool> for Components {
         if let Components::Bool(value) = self {
             Ok(value)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Bool(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Bool").into())
         }
     }
 
@@ -260,11 +214,7 @@ impl CastComponents<bool> for Components {
         if let Components::Bool(value) = self {
             Ok(value)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Bool(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Bool").into())
         }
     }
 }
@@ -274,11 +224,7 @@ impl CastComponents<KeyCode> for Components {
         if let Components::GgezKeyCode(value) = self {
             Ok(value)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::GgezKeyCode(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("GgezKeyCode").into())
         }
     }
 
@@ -286,11 +232,7 @@ impl CastComponents<KeyCode> for Components {
         if let Components::GgezKeyCode(value) = self {
             Ok(value)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::GgezKeyCode(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("GgezKeyCode").into())
         }
     }
 }
@@ -300,11 +242,7 @@ impl CastComponents<String> for Components {
         if let Components::Marker(string) = self {
             Ok(string)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Marker(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Marker").into())
         }
     }
 
@@ -312,11 +250,25 @@ impl CastComponents<String> for Components {
         if let Components::Marker(string) = self {
             Ok(string)
         } else {
-            Err(BbEcsError::CastingComponents {
-                from: self.clone(),
-                to: Components::Marker(vec![]),
-            }
-            .into())
+            Err(BbEcsError::CastingComponents("Marker").into())
+        }
+    }
+}
+
+impl CastComponents<Text> for Components {
+    fn cast_mut(&mut self) -> Result<&mut Vec<Text>> {
+        if let Components::GgezText(text) = self {
+            Ok(text)
+        } else {
+            Err(BbEcsError::CastingComponents("GgezText").into())
+        }
+    }
+
+    fn cast(&self) -> Result<&Vec<Text>> {
+        if let Components::GgezText(text) = self {
+            Ok(text)
+        } else {
+            Err(BbEcsError::CastingComponents("GgezText").into())
         }
     }
 }
@@ -330,4 +282,5 @@ pub enum Component {
     Bool,
     GgezKeyCode,
     Marker,
+    GgezText,
 }
