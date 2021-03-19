@@ -1,3 +1,4 @@
+mod bitmap;
 mod entity_data;
 
 use std::cell::RefCell;
@@ -13,19 +14,23 @@ use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
 use crate::resources::resources_data::ResourcesData;
 
+use self::bitmap::BitMap;
 use self::entity_data::EntityDataTraits;
 
 const TO_BE_DELETED: &str = "to be deleted";
+const ENTITY_ID: &str = "entity id";
 
 pub trait WorldMethods<T> {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: T) -> Result<&mut Self>;
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: T);
+    fn with_component(&mut self, name: &str, data: T) -> Result<&mut Self>;
+    fn add_resource(&mut self, name: String, data: T);
 }
 
 pub struct World {
     pub entity_data: EntityData,
     resources: ResourcesData,
     is_empty: bool,
+    next_entity_id: u32,
+    bitmap: BitMap,
 }
 
 impl World {
@@ -33,17 +38,22 @@ impl World {
         Self::default()
     }
 
-    pub fn register<S: Into<String>>(&mut self, name: S, component_type: Component) -> Result<()> {
-        self.entity_data.register(name.into(), component_type)
+    pub fn register<S: ToString>(&mut self, name: S, component_type: Component) -> Result<()> {
+        self.entity_data
+            .register(name.to_string(), component_type)?;
+        self.bitmap.register(name.to_string());
+        Ok(())
     }
 
     pub fn spawn_entity(&mut self) -> Result<&mut Self> {
-        if self.is_empty {
-            self.entity_data
-                .register(TO_BE_DELETED.into(), Component::Bool)?;
-            self.is_empty = false;
-        }
         self.entity_data.insert(TO_BE_DELETED, false)?;
+        self.entity_data.insert(ENTITY_ID, self.next_entity_id)?;
+        self.bitmap.spawn_entity();
+        self.bitmap.insert(TO_BE_DELETED)?;
+        self.bitmap.insert(ENTITY_ID)?;
+        self.is_empty = false;
+        self.next_entity_id += 1;
+
         Ok(self)
     }
 
@@ -91,122 +101,145 @@ impl World {
 
 impl Default for World {
     fn default() -> Self {
+        let mut entity_data = EntityData::new();
+        let mut bitmap = BitMap::new();
+
+        entity_data
+            .register(TO_BE_DELETED.into(), Component::Bool)
+            .unwrap();
+        bitmap.register(TO_BE_DELETED.into());
+        entity_data
+            .register(ENTITY_ID.into(), Component::U32)
+            .unwrap();
+        bitmap.register(ENTITY_ID.into());
+
         Self {
-            entity_data: EntityData::new(),
+            entity_data,
             resources: ResourcesData::new(),
             is_empty: true,
+            next_entity_id: 0,
+            bitmap,
         }
     }
 }
 
 impl WorldMethods<Point> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: Point) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: Point) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: Point) {
-        self.resources.insert(name.into(), Resource::Point(data));
+    fn add_resource(&mut self, name: String, data: Point) {
+        self.resources.insert(name, Resource::Point(data));
     }
 }
 
 impl WorldMethods<Color> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: Color) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: Color) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: Color) {
-        self.resources.insert(name.into(), Resource::Color(data));
+    fn add_resource(&mut self, name: String, data: Color) {
+        self.resources.insert(name, Resource::Color(data));
     }
 }
 
 impl WorldMethods<Mesh> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: Mesh) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: Mesh) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: Mesh) {
-        self.resources.insert(name.into(), Resource::Mesh(data));
+    fn add_resource(&mut self, name: String, data: Mesh) {
+        self.resources.insert(name, Resource::Mesh(data));
     }
 }
 
 impl WorldMethods<u32> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: u32) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: u32) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: u32) {
-        self.resources.insert(name.into(), Resource::U32(data));
+    fn add_resource(&mut self, name: String, data: u32) {
+        self.resources.insert(name, Resource::U32(data));
     }
 }
 
 impl WorldMethods<f32> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: f32) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: f32) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: f32) {
-        self.resources.insert(name.into(), Resource::F32(data));
+    fn add_resource(&mut self, name: String, data: f32) {
+        self.resources.insert(name, Resource::F32(data));
     }
 }
 
 impl WorldMethods<usize> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: usize) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: usize) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: usize) {
-        self.resources.insert(name.into(), Resource::Usize(data));
+    fn add_resource(&mut self, name: String, data: usize) {
+        self.resources.insert(name, Resource::Usize(data));
     }
 }
 
 impl WorldMethods<bool> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: bool) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: bool) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: bool) {
-        self.resources.insert(name.into(), Resource::Bool(data));
+    fn add_resource(&mut self, name: String, data: bool) {
+        self.resources.insert(name, Resource::Bool(data));
     }
 }
 
 impl WorldMethods<KeyCode> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: KeyCode) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: KeyCode) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: KeyCode) {
-        self.resources
-            .insert(name.into(), Resource::GgezKeyCode(data));
+    fn add_resource(&mut self, name: String, data: KeyCode) {
+        self.resources.insert(name, Resource::GgezKeyCode(data));
     }
 }
 
 impl WorldMethods<String> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: String) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: String) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: String) {
-        self.resources.insert(name.into(), Resource::Marker(data));
+    fn add_resource(&mut self, name: String, data: String) {
+        self.resources.insert(name, Resource::Marker(data));
     }
 }
 
 impl WorldMethods<Text> for World {
-    fn with_component<S: Into<String>>(&mut self, name: S, data: Text) -> Result<&mut Self> {
-        self.entity_data.insert(&name.into(), data)?;
+    fn with_component(&mut self, name: &str, data: Text) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
         Ok(self)
     }
 
-    fn add_resource<S: Into<String>>(&mut self, name: S, data: Text) {
-        self.resources.insert(name.into(), Resource::GgezText(data));
+    fn add_resource(&mut self, name: String, data: Text) {
+        self.resources.insert(name, Resource::GgezText(data));
     }
 }
 
@@ -222,7 +255,7 @@ mod tests {
     #[test]
     fn should_get_key_code_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("keycode", KeyCode::A);
+        world.add_resource("keycode".to_owned(), KeyCode::A);
         let wrapped_keycode = world.get_resource("keycode")?.borrow();
         let keycode: &KeyCode = wrapped_keycode.cast()?;
         assert_eq!(*keycode, KeyCode::A);
@@ -245,7 +278,7 @@ mod tests {
     #[test]
     fn should_mutably_get_key_code_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("keycode", KeyCode::A);
+        world.add_resource("keycode".to_owned(), KeyCode::A);
         let mut wrapped_keycode = world.get_resource("keycode")?.borrow_mut();
         let keycode: &mut KeyCode = wrapped_keycode.cast_mut()?;
         *keycode = KeyCode::B;
@@ -274,7 +307,7 @@ mod tests {
     #[test]
     fn should_get_marker_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("marker", "player".to_owned());
+        world.add_resource("marker".to_owned(), "player".to_owned());
         let wrapped_marker = world.get_resource("marker")?.borrow();
         let marker: &String = wrapped_marker.cast()?;
         assert_eq!(*marker, "player".to_owned());
@@ -297,7 +330,7 @@ mod tests {
     #[test]
     fn should_mutably_get_marker_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("marker", "player".to_owned());
+        world.add_resource("marker".to_owned(), "player".to_owned());
         let mut wrapped_marker = world.get_resource("marker")?.borrow_mut();
         let marker: &mut String = wrapped_marker.cast_mut()?;
         *marker = "asteroid".to_owned();
@@ -390,7 +423,7 @@ mod testing_text {
     #[test]
     fn should_get_text_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("text", Text::new("this is a text"));
+        world.add_resource("text".to_owned(), Text::new("this is a text"));
         let wrapper_text = world.get_resource("text")?.borrow();
         let text: &Text = wrapper_text.cast()?;
         assert_eq!(text.contents(), "this is a text");
@@ -413,7 +446,7 @@ mod testing_text {
     #[test]
     fn should_mutably_get_text_resource() -> Result<()> {
         let mut world = World::new();
-        world.add_resource("text", Text::new("tt"));
+        world.add_resource("text".to_owned(), Text::new("tt"));
         let mut wrapper_text = world.get_resource("text")?.borrow_mut();
         let text: &mut Text = wrapper_text.cast_mut()?;
         *text = Text::new("other text");
@@ -438,4 +471,39 @@ mod testing_text {
         assert_eq!(texts[0].contents(), "bark");
         Ok(())
     }
+}
+
+#[cfg(test)]
+mod creating_world {
+    use super::World;
+    use super::*;
+    use eyre::Result;
+
+    #[test]
+    fn should_be_able_to_create_a_world() -> Result<()> {
+        let world = World::new();
+
+        assert_eq!(world.next_entity_id, 0);
+        Ok(())
+    }
+
+    #[test]
+    fn should_increment_ids_when_inserting_entities() -> Result<()> {
+        let mut world = World::new();
+
+        world.register("rotation", Component::U32)?;
+
+        world.spawn_entity()?.with_component("rotation", 42_u32)?;
+
+        assert_eq!(world.next_entity_id, 1);
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod keeping_bitmap_updated {
+    use super::*;
+
+    #[test]
+    fn deleting_an_entity_deletes_in_bitmap() {}
 }

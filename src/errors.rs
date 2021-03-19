@@ -14,4 +14,6 @@ pub enum BbEcsError {
     ResourceNotFound(String),
     #[error("already registered component with name `{0}`")]
     ComponentAlreadyRegistered(String),
+    #[error("tried to insert into the bitmap before registering")]
+    BitMapInsertBeforeRegister,
 }
