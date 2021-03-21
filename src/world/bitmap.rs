@@ -38,4 +38,12 @@ impl BitMap {
 
         Ok(())
     }
+
+    pub fn query(&self, name: &str) -> Result<&Vec<bool>> {
+        if let Some(map) = self.entity_map.get(name) {
+            Ok(map)
+        } else {
+            Err(BbEcsError::BitMapComponentNotFound(name.to_owned()).into())
+        }
+    }
 }
