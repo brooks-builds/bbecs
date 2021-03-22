@@ -1,17 +1,11 @@
-use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 use eyre::Result;
-use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
 
-use crate::components::{CastComponents, Component};
 use crate::errors::BbEcsError;
 use crate::{components::ComponentData, data_types::point::Point};
-
-use super::bitmap::BitMap;
 
 pub trait EntityDataTraits<T> {
     fn insert(&mut self, name: &str, data: T) -> Result<()>;
@@ -29,7 +23,7 @@ impl EntityData {
         }
     }
 
-    pub fn register(&mut self, name: String, component_type: Component) -> Result<()> {
+    pub fn register(&mut self, name: String) -> Result<()> {
         if self.components.contains_key(&name) {
             return Err(BbEcsError::ComponentAlreadyRegistered(name).into());
         }
@@ -48,24 +42,44 @@ impl EntityData {
 
     pub fn query(
         &self,
-        names: Vec<(&str, Component)>,
-        bitmap: BitMap,
-    ) -> Result<Vec<&Vec<ComponentData>>> {
-        let mut results = vec![];
-        for query in names {
-            if let Some(components) = self.components.get(query.0) {
-                let map = bitmap.query(query.0)?;
-                // not correct logic
-                // we need to test if any of the components are missing and filter them out
-                let components = components
-                    .iter()
-                    .enumerate()
-                    .filter(|(index, component)| map[index]);
-                results.push(components);
+        names: Vec<&str>,
+        bitmap: Vec<&Vec<bool>>,
+    ) -> Result<Vec<Vec<&ComponentData>>> {
+        let mut current_name_indexes = vec![0; bitmap.len()];
+        let mut results = vec![vec![]; names.len()];
+        let mut components = vec![];
+
+        for name in names {
+            if let Some(raw_components) = self.components.get(name) {
+                components.push(raw_components);
             } else {
-                return Err(BbEcsError::ComponentNotFound(query.0.to_owned()).into());
+                return Err(BbEcsError::ComponentNotFound(name.to_owned()).into());
             }
         }
+
+        // for each entity in the bitmap
+        for entity_index in 0..bitmap[0].len() {
+            // for each component in the entity
+            let mut is_adding_component = true;
+            for (components_bitmap_index, components_bitmap) in bitmap.iter().enumerate() {
+                // update the name index
+                if components_bitmap[entity_index] {
+                    if entity_index != 0 {
+                        current_name_indexes[components_bitmap_index] += 1;
+                    }
+                } else {
+                    is_adding_component = false;
+                }
+            }
+            // are all of the components queried for present
+            if is_adding_component {
+                for (component_index, component) in components.iter().enumerate() {
+                    results[component_index]
+                        .push(&component[current_name_indexes[component_index]]);
+                }
+            }
+        }
+
         Ok(results)
     }
 }

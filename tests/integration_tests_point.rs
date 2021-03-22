@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use bbecs::components::{CastComponents, ComponentData};
+use bbecs::components::CastComponents;
 use bbecs::data_types::point::Point;
 use bbecs::resources::resource::ResourceCast;
 use bbecs::world::{World, WorldMethods};
@@ -58,7 +58,7 @@ fn integration_test_point_query_one_components() -> Result<()> {
     let component_name = "location";
     let component = Point::new(0.0, 0.0);
 
-    world.register(component_name, bbecs::components::Component::Point)?;
+    world.register(component_name)?;
 
     world
         .spawn_entity()?
@@ -78,7 +78,7 @@ fn integration_test_point_query_one_mut_components() -> Result<()> {
     let component_name = "location";
     let component = Point::new(0.0, 0.0);
 
-    world.register(component_name, bbecs::components::Component::Point)?;
+    world.register(component_name)?;
 
     world
         .spawn_entity()?

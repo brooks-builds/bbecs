@@ -4,7 +4,7 @@ use eyre::Result;
 
 use crate::errors::BbEcsError;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct BitMap {
     entity_map: HashMap<String, Vec<bool>>,
     length: usize,
@@ -39,11 +39,17 @@ impl BitMap {
         Ok(())
     }
 
-    pub fn query(&self, name: &str) -> Result<&Vec<bool>> {
-        if let Some(map) = self.entity_map.get(name) {
-            Ok(map)
-        } else {
-            Err(BbEcsError::BitMapComponentNotFound(name.to_owned()).into())
+    pub fn query(&self, names: Vec<&str>) -> Result<Vec<&Vec<bool>>> {
+        let mut results = vec![];
+
+        for name in names {
+            if let Some(map) = self.entity_map.get(name) {
+                results.push(map);
+            } else {
+                return Err(BbEcsError::BitMapComponentNotFound(name.to_owned()).into());
+            }
         }
+
+        Ok(results)
     }
 }

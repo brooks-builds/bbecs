@@ -12,7 +12,7 @@ fn spawning_entities_includes_id() -> Result<()> {
     let location_name = "location";
     let location = Point::new(0.0, 0.0);
 
-    world.register(location_name, bbecs::components::Component::Point)?;
+    world.register(location_name)?;
 
     world
         .spawn_entity()?
@@ -38,7 +38,7 @@ fn spawning_entities_includes_deleted_flag() -> Result<()> {
     let location_name = "location";
     let location = Point::new(0.0, 0.0);
 
-    world.register(location_name, bbecs::components::Component::Point)?;
+    world.register(location_name)?;
 
     world
         .spawn_entity()?

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use bbecs::components::{CastComponents, Component, ComponentData};
+use bbecs::components::CastComponents;
 use bbecs::data_types::point::Point;
 use bbecs::world::{World, WorldMethods};
 use eyre::Result;
@@ -14,20 +14,17 @@ fn querying_for_multiple_components() -> Result<()> {
     let location = Point::new(0.0, 0.0);
     let size = 15_u32;
 
-    world.register(location_name, Component::Point)?;
-    world.register(size_name, Component::U32)?;
+    world.register(location_name)?;
+    world.register(size_name)?;
 
     world
         .spawn_entity()?
         .with_component(location_name, location)?
         .with_component(size_name, size)?;
 
-    let components = world.query(vec![
-        (location_name, Component::Point),
-        (size_name, Component::U32),
-    ])?;
-    let locations = components[0];
-    let sizes = components[1];
+    let components = world.query(vec![location_name, size_name])?;
+    let locations = &components[0];
+    let sizes = &components[1];
 
     let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
     let wrapped_size: &Rc<RefCell<u32>> = sizes[0].cast()?;
@@ -51,8 +48,8 @@ fn query_for_entities_when_not_all_entities_have_same_number_of_components() -> 
     let size = 15_u32;
     let third_size = 30_u32;
 
-    world.register(location_name, Component::Point)?;
-    world.register(size_name, Component::U32)?;
+    world.register(location_name)?;
+    world.register(size_name)?;
 
     world
         .spawn_entity()?
@@ -68,13 +65,17 @@ fn query_for_entities_when_not_all_entities_have_same_number_of_components() -> 
         .with_component(location_name, third_location)?
         .with_component(size_name, third_size)?;
 
-    let components = world.query(vec![
-        (location_name, Component::Point),
-        (size_name, Component::U32),
-    ])?;
-    let locations = components[0];
-    let sizes = components[1];
+    let components = world.query(vec![location_name, size_name])?;
+    let locations = &components[0];
+    let sizes = &components[1];
 
     assert_eq!(locations.len(), sizes.len());
+    assert_eq!(locations.len(), 2);
+    let wrapped_queried_first_location: &Rc<RefCell<Point>> = locations[0].cast()?;
+    let queried_first_location = wrapped_queried_first_location.borrow();
+    assert_eq!(*queried_first_location, first_location);
+    let wrapped_queried_second_location: &Rc<RefCell<Point>> = locations[1].cast()?;
+    let queried_second_location = wrapped_queried_second_location.borrow();
+    assert_eq!(*queried_second_location, third_location);
     Ok(())
 }

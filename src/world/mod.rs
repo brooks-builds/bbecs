@@ -6,10 +6,8 @@ use std::rc::Rc;
 
 use entity_data::EntityData;
 use eyre::Result;
-use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
 
-use crate::components::{CastComponents, Component, ComponentData};
+use crate::components::ComponentData;
 use crate::data_types::point::Point;
 use crate::resources::resource::Resource;
 use crate::resources::resources_data::ResourcesData;
@@ -38,9 +36,8 @@ impl World {
         Self::default()
     }
 
-    pub fn register<S: ToString>(&mut self, name: S, component_type: Component) -> Result<()> {
-        self.entity_data
-            .register(name.to_string(), component_type)?;
+    pub fn register<S: ToString>(&mut self, name: S) -> Result<()> {
+        self.entity_data.register(name.to_string())?;
         self.bitmap.register(name.to_string());
         Ok(())
     }
@@ -61,8 +58,9 @@ impl World {
         self.entity_data.query_one(&name.into())
     }
 
-    pub fn query(&self, names: Vec<(&str, Component)>) -> Result<Vec<&Vec<ComponentData>>> {
-        self.entity_data.query(names)
+    pub fn query(&self, names: Vec<&str>) -> Result<Vec<Vec<&ComponentData>>> {
+        let bitmap_query = self.bitmap.query(names.clone())?;
+        self.entity_data.query(names, bitmap_query)
     }
 
     pub fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Resource>>> {
@@ -100,13 +98,9 @@ impl Default for World {
         let mut entity_data = EntityData::new();
         let mut bitmap = BitMap::new();
 
-        entity_data
-            .register(TO_BE_DELETED.into(), Component::Bool)
-            .unwrap();
+        entity_data.register(TO_BE_DELETED.into()).unwrap();
         bitmap.register(TO_BE_DELETED.into());
-        entity_data
-            .register(ENTITY_ID.into(), Component::U32)
-            .unwrap();
+        entity_data.register(ENTITY_ID.into()).unwrap();
         bitmap.register(ENTITY_ID.into());
 
         Self {
