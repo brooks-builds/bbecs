@@ -52,4 +52,52 @@ impl BitMap {
 
         Ok(results)
     }
+
+    pub fn calculate_component_indexes_to_delete(
+        &self,
+        entity_indexes: &[usize],
+    ) -> Result<HashMap<String, Vec<usize>>> {
+        let mut component_indexes_to_delete = HashMap::new();
+
+        for (component_name, bitmap) in &self.entity_map {
+            let mut indexes_to_delete = vec![];
+
+            for entity_index in entity_indexes {
+                if !bitmap[*entity_index] {
+                    continue;
+                }
+
+                indexes_to_delete
+                    .push(entity_index - self.count_falses_before_index(bitmap, *entity_index)?);
+            }
+
+            component_indexes_to_delete.insert(component_name.to_owned(), indexes_to_delete);
+        }
+
+        Ok(component_indexes_to_delete)
+    }
+
+    pub fn delete_entities_by_index(&mut self, mut entity_indexes: Vec<usize>) -> Result<()> {
+        entity_indexes.reverse();
+        for components in self.entity_map.values_mut() {
+            for entity_index in &entity_indexes {
+                components.remove(*entity_index);
+            }
+        }
+        Ok(())
+    }
+
+    fn count_falses_before_index(&self, components: &[bool], index: usize) -> Result<usize> {
+        if index >= components.len() {
+            return Err(BbEcsError::OutOfRangeInVector.into());
+        }
+
+        let total_falses: &Vec<bool> = &components[0..index]
+            .iter()
+            .filter(|current| !*current)
+            .cloned()
+            .collect();
+
+        Ok(total_falses.len())
+    }
 }

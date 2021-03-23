@@ -18,4 +18,8 @@ pub enum BbEcsError {
     BitMapInsertBeforeRegister,
     #[error("BitMap component `{0}` not found")]
     BitMapComponentNotFound(String),
+    #[error(
+        "You tried to access a vector with an index that is greater than the length of the vector"
+    )]
+    OutOfRangeInVector,
 }

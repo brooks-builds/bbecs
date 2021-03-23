@@ -53,49 +53,48 @@ fn integration_test_point_resource_mut() -> Result<()> {
 }
 
 #[test]
-fn integration_test_point_query_one_components() -> Result<()> {
+fn integration_test_point_query() -> Result<()> {
     let mut world = World::new();
-    let component_name = "location";
-    let component = Point::new(0.0, 0.0);
 
-    world.register(component_name)?;
+    world.register("location")?;
 
     world
         .spawn_entity()?
-        .with_component(component_name, component)?;
+        .with_component("location", Point::new(0.0, 0.0))?;
 
-    let components = world.query_one(component_name)?;
-    let wrapped_location: &Rc<RefCell<Point>> = components[0].cast()?;
-    let queried_location = wrapped_location.borrow();
+    let query_results = world.query(vec!["location"])?;
+    let locations = &query_results[0];
 
-    assert_eq!(*queried_location, component);
+    let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
+    let location = wrapped_location.borrow();
+
+    assert_eq!(*location, Point::new(0.0, 0.0));
     Ok(())
 }
 
 #[test]
-fn integration_test_point_query_one_mut_components() -> Result<()> {
+fn integration_test_point_query_mut() -> Result<()> {
     let mut world = World::new();
-    let component_name = "location";
-    let component = Point::new(0.0, 0.0);
 
-    world.register(component_name)?;
+    world.register("location")?;
 
     world
         .spawn_entity()?
-        .with_component(component_name, component)?;
+        .with_component("location", Point::new(0.0, 0.0))?;
 
-    let components = world.query_one(component_name)?;
-    let wrapped_location: &Rc<RefCell<Point>> = components[0].cast()?;
     {
-        let mut queried_location = wrapped_location.borrow_mut();
-
-        queried_location.x += 10.0;
+        let query_results = world.query(vec!["location"])?;
+        let locations = &query_results[0];
+        let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
+        let mut location = wrapped_location.borrow_mut();
+        location.x += 10.0;
     }
 
-    let component = Point::new(10.0, 0.0);
-    let wrapped_updated_location: &Rc<RefCell<Point>> = components[0].cast()?;
-    let updated_location = wrapped_updated_location.borrow();
+    let query_results = world.query(vec!["location"])?;
+    let locations = &query_results[0];
+    let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
+    let location = wrapped_location.borrow();
 
-    assert_eq!(*updated_location, component);
+    assert_eq!(*location, Point::new(10.0, 0.0));
     Ok(())
 }
