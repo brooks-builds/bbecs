@@ -20,7 +20,7 @@ jobs:
     steps:
       # Defining a custom shell command to run for this job
       - name: Install Packages
-        run: sudo apt install libasound2-dev libudev-dev pkg-config
+        run: sudo apt update && sudo apt install libasound2-dev libudev-dev pkg-config
       # Predefined GitHub action that is available globally
       # This is supposed to cache the install
       - uses: actions/cache@v2
