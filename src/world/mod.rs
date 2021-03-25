@@ -20,6 +20,8 @@ use self::entity_data::EntityDataTraits;
 const TO_BE_DELETED: &str = "to be deleted";
 pub const ENTITY_ID: &str = "entity id";
 
+pub type DataWrapper<T> = Rc<RefCell<T>>;
+
 pub trait WorldMethods<T> {
     fn with_component(&mut self, name: &str, data: T) -> Result<&mut Self>;
     fn add_resource(&mut self, name: String, data: T);
