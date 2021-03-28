@@ -57,7 +57,7 @@ fn integration_test_point_query() -> Result<()> {
         .with_component("color", Color::new(0.5, 0.2, 0.8, 1.0))?;
 
     let query_results = world.query(vec!["color"])?;
-    let colors = &query_results[0];
+    let colors = query_results.get("color").unwrap();
 
     let wrapped_colors: &Rc<RefCell<Color>> = colors[0].cast()?;
     let color = wrapped_colors.borrow();
@@ -78,14 +78,14 @@ fn integration_test_point_query_mut() -> Result<()> {
 
     {
         let query_results = world.query(vec!["color"])?;
-        let colors = &query_results[0];
+        let colors = query_results.get("color").unwrap();
         let wrapped_colors: &Rc<RefCell<Color>> = colors[0].cast()?;
         let mut color = wrapped_colors.borrow_mut();
         color.r += 0.1;
     }
 
     let query_results = world.query(vec!["color"])?;
-    let colors = &query_results[0];
+    let colors = query_results.get("color").unwrap();
     let wrapped_colors: &Rc<RefCell<Color>> = colors[0].cast()?;
     let color = wrapped_colors.borrow();
 

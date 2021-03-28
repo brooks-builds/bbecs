@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use eyre::Result;
 
@@ -39,12 +39,12 @@ impl BitMap {
         Ok(())
     }
 
-    pub fn query(&self, names: Vec<&str>) -> Result<Vec<&Vec<bool>>> {
-        let mut results = vec![];
+    pub fn query(&self, names: Vec<&str>) -> Result<BTreeMap<String, &Vec<bool>>> {
+        let mut results = BTreeMap::new();
 
         for name in names {
             if let Some(map) = self.entity_map.get(name) {
-                results.push(map);
+                results.insert(name.to_owned(), map);
             } else {
                 return Err(BbEcsError::BitMapComponentNotFound(name.to_owned()).into());
             }

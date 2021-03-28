@@ -10,8 +10,8 @@ use eyre::Result;
 fn deleting_an_entity_by_id() -> Result<()> {
     let mut world = World::new();
 
-    world.register("location")?;
     world.register("size")?;
+    world.register("location")?;
 
     world
         .spawn_entity()?
@@ -28,8 +28,8 @@ fn deleting_an_entity_by_id() -> Result<()> {
         .with_component("size", 50.0_f32)?;
     {
         let query_results = world.query(vec!["location", ENTITY_ID])?;
-        let locations = &query_results[0];
-        let ids = &query_results[1];
+        let locations = query_results.get("location").unwrap();
+        let ids = query_results.get(ENTITY_ID).unwrap();
 
         for (index, location) in locations.iter().enumerate() {
             let wrapped_location: &Rc<RefCell<Point>> = location.cast()?;
@@ -45,7 +45,7 @@ fn deleting_an_entity_by_id() -> Result<()> {
     world.update()?;
 
     let query_results = world.query(vec!["location"])?;
-    let queried_locations = &query_results[0];
+    let queried_locations = query_results.get("location").unwrap();
     let wrapped_location: &Rc<RefCell<Point>> = queried_locations[1].cast()?;
     let location = wrapped_location.borrow();
 

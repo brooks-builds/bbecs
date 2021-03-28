@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
 use eyre::Result;
@@ -36,45 +36,45 @@ impl EntityData {
 
     pub fn query(
         &self,
-        names: Vec<&str>,
-        bitmap: Vec<&Vec<bool>>,
-    ) -> Result<Vec<Vec<&ComponentData>>> {
-        let mut current_name_indexes = vec![0; bitmap.len()];
-        let mut results = vec![vec![]; names.len()];
-        let mut components = vec![];
+        bitmap: BTreeMap<String, &Vec<bool>>,
+    ) -> Result<HashMap<String, Vec<&ComponentData>>> {
+        let mut results = HashMap::new();
 
-        for name in names {
-            if let Some(raw_components) = self.components.get(name) {
-                components.push(raw_components);
+        for (name, map) in bitmap.iter() {
+            if let Some(components_list) = self.components.get(name) {
+                let mut missing_components_count = 0;
+                let mut component_results = vec![];
+                for (index, component_map) in map.iter().enumerate() {
+                    if *component_map {
+                        if self.does_entity_have_all_components(&bitmap, index) {
+                            component_results
+                                .push(&components_list[index - missing_components_count]);
+                        }
+                    } else {
+                        missing_components_count += 1;
+                    }
+                }
+                results.insert(name.to_owned(), component_results);
             } else {
                 return Err(BbEcsError::ComponentNotFound(name.to_owned()).into());
             }
         }
 
-        // for each entity in the bitmap
-        for entity_index in 0..bitmap[0].len() {
-            // for each component in the entity
-            let mut is_adding_component = true;
-            for (components_bitmap_index, components_bitmap) in bitmap.iter().enumerate() {
-                // update the name index
-                if components_bitmap[entity_index] {
-                    if entity_index != 0 {
-                        current_name_indexes[components_bitmap_index] += 1;
-                    }
-                } else {
-                    is_adding_component = false;
-                }
-            }
-            // are all of the components queried for present
-            if is_adding_component {
-                for (component_index, component) in components.iter().enumerate() {
-                    results[component_index]
-                        .push(&component[current_name_indexes[component_index]]);
-                }
+        Ok(results)
+    }
+
+    fn does_entity_have_all_components(
+        &self,
+        bitmap: &BTreeMap<String, &Vec<bool>>,
+        entity_index: usize,
+    ) -> bool {
+        for components in bitmap.values() {
+            if !components[entity_index] {
+                return false;
             }
         }
 
-        Ok(results)
+        true
     }
 
     pub fn delete_entities_by_index(&mut self, bitmap: HashMap<String, Vec<usize>>) -> Result<()> {

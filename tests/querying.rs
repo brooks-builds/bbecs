@@ -5,6 +5,7 @@ use bbecs::components::CastComponents;
 use bbecs::data_types::point::Point;
 use bbecs::world::{World, WorldMethods};
 use eyre::Result;
+use ggez::graphics::Text;
 
 #[test]
 fn querying_for_multiple_components() -> Result<()> {
@@ -14,8 +15,8 @@ fn querying_for_multiple_components() -> Result<()> {
     let location = Point::new(0.0, 0.0);
     let size = 15_u32;
 
-    world.register(location_name)?;
     world.register(size_name)?;
+    world.register(location_name)?;
 
     world
         .spawn_entity()?
@@ -23,8 +24,8 @@ fn querying_for_multiple_components() -> Result<()> {
         .with_component(size_name, size)?;
 
     let components = world.query(vec![location_name, size_name])?;
-    let locations = &components[0];
-    let sizes = &components[1];
+    let locations = components.get(location_name).unwrap();
+    let sizes = components.get(size_name).unwrap();
 
     let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
     let wrapped_size: &Rc<RefCell<u32>> = sizes[0].cast()?;
@@ -66,8 +67,8 @@ fn query_for_entities_when_not_all_entities_have_same_number_of_components() -> 
         .with_component(size_name, third_size)?;
 
     let components = world.query(vec![location_name, size_name])?;
-    let locations = &components[0];
-    let sizes = &components[1];
+    let locations = components.get(location_name).unwrap();
+    let sizes = components.get(size_name).unwrap();
 
     assert_eq!(locations.len(), sizes.len());
     assert_eq!(locations.len(), 2);
@@ -77,5 +78,32 @@ fn query_for_entities_when_not_all_entities_have_same_number_of_components() -> 
     let wrapped_queried_second_location: &Rc<RefCell<Point>> = locations[1].cast()?;
     let queried_second_location = wrapped_queried_second_location.borrow();
     assert_eq!(*queried_second_location, third_location);
+    Ok(())
+}
+
+#[test]
+fn querying_for_messages() -> Result<()> {
+    let mut world = World::new();
+
+    world.register("location")?;
+    world.register("message")?;
+    world.register("size")?;
+
+    // another entity that we don't want in the query
+    world
+        .spawn_entity()?
+        .with_component("location", Point::new(10.0, 10.0))?
+        .with_component("size", 15.0_f32)?;
+
+    world
+        .spawn_entity()?
+        .with_component("location", Point::new(0.0, 0.0))?
+        .with_component("message", Text::new("testing"))?;
+
+    let queries = world.query(vec!["location", "message"])?;
+    let locations = queries.get("location").unwrap();
+    let messages = queries.get("message").unwrap();
+    assert_eq!(locations.len(), messages.len());
+
     Ok(())
 }

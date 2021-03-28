@@ -2,6 +2,7 @@ pub mod bitmap;
 mod entity_data;
 
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use entity_data::EntityData;
@@ -58,9 +59,9 @@ impl World {
         Ok(self)
     }
 
-    pub fn query(&self, names: Vec<&str>) -> Result<Vec<Vec<&ComponentData>>> {
+    pub fn query(&self, names: Vec<&str>) -> Result<HashMap<String, Vec<&ComponentData>>> {
         let bitmap_query = self.bitmap.query(names.clone())?;
-        self.entity_data.query(names, bitmap_query)
+        self.entity_data.query(bitmap_query)
     }
 
     pub fn get_resource<S: Into<String>>(&self, name: S) -> Result<&Rc<RefCell<Resource>>> {
@@ -69,7 +70,7 @@ impl World {
 
     pub fn update(&mut self) -> Result<()> {
         let query_results = self.query(vec![TO_BE_DELETED])?;
-        let to_be_deleted_query = &query_results[0];
+        let to_be_deleted_query = query_results.get(TO_BE_DELETED).unwrap();
         let mut bitmap_indexes_to_delete = vec![];
 
         to_be_deleted_query
@@ -97,8 +98,8 @@ impl World {
 
     pub fn delete_by_id(&self, id: u32) -> Result<()> {
         let query_results = self.query(vec![TO_BE_DELETED, ENTITY_ID])?;
-        let query_to_be_deleted = &query_results[0];
-        let query_ids = &query_results[1];
+        let query_to_be_deleted = query_results.get(TO_BE_DELETED).unwrap();
+        let query_ids = query_results.get(ENTITY_ID).unwrap();
 
         for (index, component_id) in query_ids.iter().enumerate() {
             let wrapped_component_id: &Rc<RefCell<u32>> = component_id.cast()?;

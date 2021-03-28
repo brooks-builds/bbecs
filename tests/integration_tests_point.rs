@@ -63,7 +63,7 @@ fn integration_test_point_query() -> Result<()> {
         .with_component("location", Point::new(0.0, 0.0))?;
 
     let query_results = world.query(vec!["location"])?;
-    let locations = &query_results[0];
+    let locations = query_results.get("location").unwrap();
 
     let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
     let location = wrapped_location.borrow();
@@ -84,14 +84,14 @@ fn integration_test_point_query_mut() -> Result<()> {
 
     {
         let query_results = world.query(vec!["location"])?;
-        let locations = &query_results[0];
+        let locations = query_results.get("location").unwrap();
         let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
         let mut location = wrapped_location.borrow_mut();
         location.x += 10.0;
     }
 
     let query_results = world.query(vec!["location"])?;
-    let locations = &query_results[0];
+    let locations = query_results.get("location").unwrap();
     let wrapped_location: &Rc<RefCell<Point>> = locations[0].cast()?;
     let location = wrapped_location.borrow();
 
