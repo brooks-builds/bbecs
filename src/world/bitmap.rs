@@ -84,6 +84,7 @@ impl BitMap {
                 components.remove(*entity_index);
             }
         }
+        self.length -= entity_indexes.len();
         Ok(())
     }
 

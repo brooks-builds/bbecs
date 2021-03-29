@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use bbecs::components::CastComponents;
 use bbecs::data_types::point::Point;
-use bbecs::world::{World, WorldMethods, ENTITY_ID};
+use bbecs::world::{DataWrapper, World, WorldMethods, ENTITY_ID};
 use eyre::Result;
 
 #[test]
@@ -51,6 +51,35 @@ fn deleting_an_entity_by_id() -> Result<()> {
 
     assert_eq!(queried_locations.len(), 2);
     assert_eq!(*location, Point::new(15.0, 15.0));
+
+    Ok(())
+}
+
+#[test]
+#[allow(clippy::float_cmp)]
+fn inserting_an_entity_after_deleting_should_work() -> Result<()> {
+    let mut world = World::new();
+    world.register("size")?;
+    world.spawn_entity()?.with_component("size", 15.0_f32)?;
+
+    let query = world.query(vec!["size", ENTITY_ID])?;
+    let _wrapped_size: &DataWrapper<f32> = query.get("size").unwrap()[0].cast()?;
+    let wrapped_id: &DataWrapper<u32> = query.get(ENTITY_ID).unwrap()[0].cast()?;
+
+    let id = *wrapped_id.borrow();
+
+    world.delete_by_id(id)?;
+
+    world.update()?;
+
+    world.spawn_entity()?.with_component("size", 30.0_f32)?;
+
+    let query = world.query(vec!["size", ENTITY_ID])?;
+    let wrapped_size: &DataWrapper<f32> = query.get("size").unwrap()[0].cast()?;
+    let wrapped_id: &DataWrapper<u32> = query.get(ENTITY_ID).unwrap()[0].cast()?;
+
+    assert_eq!(id, *wrapped_id.borrow());
+    assert_eq!(*wrapped_size.borrow(), 30.0_f32);
 
     Ok(())
 }
