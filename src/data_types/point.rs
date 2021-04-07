@@ -93,6 +93,20 @@ impl Point {
     pub fn rotation(&self) -> f32 {
         self.y.atan2(self.x)
     }
+
+    pub fn clamp(&mut self, max: f32, min: f32) {
+        if self.x < min {
+            self.x = min;
+        } else if self.x > max {
+            self.x = max;
+        }
+
+        if self.y < min {
+            self.y = min;
+        } else if self.y > max {
+            self.y = max;
+        }
+    }
 }
 
 impl Default for Point {
