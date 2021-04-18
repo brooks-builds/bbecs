@@ -255,3 +255,15 @@ impl WorldMethods<Text> for World {
         self.resources.insert(name, Resource::GgezText(data));
     }
 }
+
+impl WorldMethods<ggez::audio::SoundData> for World {
+    fn with_component(&mut self, name: &str, data: ggez::audio::SoundData) -> Result<&mut Self> {
+        self.entity_data.insert(name, data)?;
+        self.bitmap.insert(name)?;
+        Ok(self)
+    }
+
+    fn add_resource(&mut self, name: String, data: ggez::audio::SoundData) {
+        self.resources.insert(name, Resource::GgezSound(data));
+    }
+}

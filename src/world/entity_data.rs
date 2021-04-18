@@ -200,3 +200,14 @@ impl EntityDataTraits<Text> for EntityData {
         Ok(())
     }
 }
+
+impl EntityDataTraits<ggez::audio::SoundData> for EntityData {
+    fn insert(&mut self, name: &str, data: ggez::audio::SoundData) -> Result<()> {
+        if let Some(components) = self.components.get_mut(name) {
+            components.push(ComponentData::GgezSound(Rc::new(RefCell::new(data))));
+        } else {
+            return Err(BbEcsError::NeedToRegister.into());
+        }
+        Ok(())
+    }
+}

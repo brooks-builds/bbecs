@@ -29,6 +29,7 @@ pub enum ComponentData {
     GgezKeyCode(Rc<RefCell<KeyCode>>),
     Marker(Rc<RefCell<String>>),
     GgezText(Rc<RefCell<Text>>),
+    GgezSound(Rc<RefCell<ggez::audio::SoundData>>),
 }
 
 impl CastComponents<Point> for ComponentData {
@@ -207,6 +208,24 @@ impl CastComponents<Text> for ComponentData {
             Ok(text)
         } else {
             Err(BbEcsError::CastingComponents("GgezText").into())
+        }
+    }
+}
+
+impl CastComponents<ggez::audio::SoundData> for ComponentData {
+    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<ggez::audio::SoundData>>> {
+        if let Self::GgezSound(data) = self {
+            Ok(data)
+        } else {
+            Err(BbEcsError::CastingComponents("GgezSound").into())
+        }
+    }
+
+    fn cast(&self) -> Result<&Rc<RefCell<ggez::audio::SoundData>>> {
+        if let Self::GgezSound(data) = self {
+            Ok(data)
+        } else {
+            Err(BbEcsError::CastingComponents("GgezSound").into())
         }
     }
 }

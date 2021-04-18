@@ -22,6 +22,7 @@ pub enum Resource {
     GgezKeyCode(KeyCode),
     Marker(String),
     GgezText(Text),
+    GgezSound(ggez::audio::SoundData),
 }
 
 impl ResourceCast<u32> for Resource {
@@ -200,6 +201,24 @@ impl ResourceCast<Text> for Resource {
             Ok(ggez_text)
         } else {
             Err(BbEcsError::CastingResource("ggez_text").into())
+        }
+    }
+}
+
+impl ResourceCast<ggez::audio::SoundData> for Resource {
+    fn cast(&self) -> Result<&ggez::audio::SoundData> {
+        if let Resource::GgezSound(ggez_sound) = self {
+            Ok(ggez_sound)
+        } else {
+            Err(BbEcsError::CastingResource("ggez_sound").into())
+        }
+    }
+
+    fn cast_mut(&mut self) -> Result<&mut ggez::audio::SoundData> {
+        if let Resource::GgezSound(ggez_sound) = self {
+            Ok(ggez_sound)
+        } else {
+            Err(BbEcsError::CastingResource("ggez_sound").into())
         }
     }
 }
