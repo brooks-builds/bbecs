@@ -78,7 +78,7 @@ fn inserting_an_entity_after_deleting_should_work() -> Result<()> {
     let wrapped_size: &DataWrapper<f32> = query.get("size").unwrap()[0].cast()?;
     let wrapped_id: &DataWrapper<u32> = query.get(ENTITY_ID).unwrap()[0].cast()?;
 
-    assert_eq!(id, *wrapped_id.borrow());
+    assert_eq!(1, *wrapped_id.borrow());
     assert_eq!(*wrapped_size.borrow(), 30.0_f32);
 
     Ok(())
