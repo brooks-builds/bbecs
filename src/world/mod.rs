@@ -7,6 +7,7 @@ use std::rc::Rc;
 
 use entity_data::EntityData;
 use eyre::Result;
+use ggez::audio::SoundData;
 use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh, Text};
 
@@ -17,6 +18,22 @@ use crate::resources::resources_data::ResourcesData;
 
 use self::bitmap::BitMap;
 use self::entity_data::EntityDataTraits;
+
+macro_rules! impl_world_trait {
+    ($new_type:ty, $arm:ident) => {
+        impl WorldMethods<$new_type> for World {
+            fn with_component(&mut self, name: &str, data: $new_type) -> Result<&mut Self> {
+                self.entity_data.insert(name, data)?;
+                self.bitmap.insert(name)?;
+                Ok(self)
+            }
+
+            fn add_resource(&mut self, name: String, data: $new_type) {
+                self.resources.insert(name, Resource::$arm(data));
+            }
+        }
+    };
+}
 
 const TO_BE_DELETED: &str = "to be deleted";
 pub const ENTITY_ID: &str = "entity id";
@@ -136,134 +153,14 @@ impl Default for World {
     }
 }
 
-impl WorldMethods<Point> for World {
-    fn with_component(&mut self, name: &str, data: Point) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: Point) {
-        self.resources.insert(name, Resource::Point(data));
-    }
-}
-
-impl WorldMethods<Color> for World {
-    fn with_component(&mut self, name: &str, data: Color) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: Color) {
-        self.resources.insert(name, Resource::Color(data));
-    }
-}
-
-impl WorldMethods<Mesh> for World {
-    fn with_component(&mut self, name: &str, data: Mesh) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: Mesh) {
-        self.resources.insert(name, Resource::Mesh(data));
-    }
-}
-
-impl WorldMethods<u32> for World {
-    fn with_component(&mut self, name: &str, data: u32) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: u32) {
-        self.resources.insert(name, Resource::U32(data));
-    }
-}
-
-impl WorldMethods<f32> for World {
-    fn with_component(&mut self, name: &str, data: f32) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: f32) {
-        self.resources.insert(name, Resource::F32(data));
-    }
-}
-
-impl WorldMethods<usize> for World {
-    fn with_component(&mut self, name: &str, data: usize) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: usize) {
-        self.resources.insert(name, Resource::Usize(data));
-    }
-}
-
-impl WorldMethods<bool> for World {
-    fn with_component(&mut self, name: &str, data: bool) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: bool) {
-        self.resources.insert(name, Resource::Bool(data));
-    }
-}
-
-impl WorldMethods<KeyCode> for World {
-    fn with_component(&mut self, name: &str, data: KeyCode) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: KeyCode) {
-        self.resources.insert(name, Resource::GgezKeyCode(data));
-    }
-}
-
-impl WorldMethods<String> for World {
-    fn with_component(&mut self, name: &str, data: String) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: String) {
-        self.resources.insert(name, Resource::Marker(data));
-    }
-}
-
-impl WorldMethods<Text> for World {
-    fn with_component(&mut self, name: &str, data: Text) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: Text) {
-        self.resources.insert(name, Resource::GgezText(data));
-    }
-}
-
-impl WorldMethods<ggez::audio::SoundData> for World {
-    fn with_component(&mut self, name: &str, data: ggez::audio::SoundData) -> Result<&mut Self> {
-        self.entity_data.insert(name, data)?;
-        self.bitmap.insert(name)?;
-        Ok(self)
-    }
-
-    fn add_resource(&mut self, name: String, data: ggez::audio::SoundData) {
-        self.resources.insert(name, Resource::GgezSound(data));
-    }
-}
+impl_world_trait!(Color, Color);
+impl_world_trait!(Mesh, Mesh);
+impl_world_trait!(Point, Point);
+impl_world_trait!(u32, U32);
+impl_world_trait!(f32, F32);
+impl_world_trait!(usize, Usize);
+impl_world_trait!(bool, Bool);
+impl_world_trait!(KeyCode, GgezKeyCode);
+impl_world_trait!(String, Marker);
+impl_world_trait!(Text, GgezText);
+impl_world_trait!(SoundData, GgezSound);

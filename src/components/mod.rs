@@ -3,15 +3,32 @@ pub mod helpers;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use eyre::Result;
+use eyre::{bail, Result};
+use ggez::audio::SoundData;
 use ggez::event::KeyCode;
 use ggez::graphics::{Color, Mesh, Text};
 
 use crate::data_types::point::Point;
-use crate::errors::BbEcsError;
+
+macro_rules! impl_component_data_cast {
+    ($new_type:ty, $arm:ident) => {
+        impl CastComponents<$new_type> for ComponentData {
+            fn cast(&self) -> Result<&Rc<RefCell<$new_type>>> {
+                if let ComponentData::$arm(value) = self {
+                    Ok(value)
+                } else {
+                    bail!(
+                        "Error casting component from {:?} to {}",
+                        self,
+                        stringify!($new_type)
+                    )
+                }
+            }
+        }
+    };
+}
 
 pub trait CastComponents<T> {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<T>>>;
     fn cast(&self) -> Result<&Rc<RefCell<T>>>;
 }
 
@@ -34,203 +51,18 @@ pub enum ComponentData {
     GgezSound(Rc<RefCell<ggez::audio::SoundData>>),
 }
 
-impl CastComponents<Point> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<Point>>> {
-        if let Self::Point(points) = self {
-            Ok(points)
-        } else {
-            Err(BbEcsError::CastingComponents("Point").into())
-        }
-    }
+impl_component_data_cast!(Point, Point);
+impl_component_data_cast!(f32, F32);
+impl_component_data_cast!(Color, Color);
+impl_component_data_cast!(Mesh, Mesh);
+impl_component_data_cast!(u32, U32);
+impl_component_data_cast!(usize, Usize);
+impl_component_data_cast!(bool, Bool);
+impl_component_data_cast!(KeyCode, GgezKeyCode);
+impl_component_data_cast!(String, Marker);
+impl_component_data_cast!(Text, GgezText);
+impl_component_data_cast!(SoundData, GgezSound);
 
-    fn cast(&self) -> Result<&Rc<RefCell<Point>>> {
-        if let Self::Point(points) = self {
-            Ok(points)
-        } else {
-            Err(BbEcsError::CastingComponents("Point").into())
-        }
-    }
-}
-
-impl CastComponents<f32> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<f32>>> {
-        if let Self::F32(numbers) = self {
-            Ok(numbers)
-        } else {
-            Err(BbEcsError::CastingComponents("F32").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<f32>>> {
-        if let Self::F32(number) = self {
-            Ok(number)
-        } else {
-            Err(BbEcsError::CastingComponents("F32").into())
-        }
-    }
-}
-
-impl CastComponents<Color> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<Color>>> {
-        if let Self::Color(color) = self {
-            Ok(color)
-        } else {
-            Err(BbEcsError::CastingComponents("Color").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<Color>>> {
-        if let Self::Color(color) = self {
-            Ok(color)
-        } else {
-            Err(BbEcsError::CastingComponents("Color").into())
-        }
-    }
-}
-
-impl CastComponents<Mesh> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<Mesh>>> {
-        if let Self::Mesh(mesh) = self {
-            Ok(mesh)
-        } else {
-            Err(BbEcsError::CastingComponents("Mesh").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<Mesh>>> {
-        if let Self::Mesh(mesh) = self {
-            Ok(mesh)
-        } else {
-            Err(BbEcsError::CastingComponents("Mesh").into())
-        }
-    }
-}
-
-impl CastComponents<u32> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<u32>>> {
-        if let Self::U32(number) = self {
-            Ok(number)
-        } else {
-            Err(BbEcsError::CastingComponents("U32").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<u32>>> {
-        if let Self::U32(number) = self {
-            Ok(number)
-        } else {
-            Err(BbEcsError::CastingComponents("U32").into())
-        }
-    }
-}
-
-impl CastComponents<usize> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<usize>>> {
-        if let Self::Usize(number) = self {
-            Ok(number)
-        } else {
-            Err(BbEcsError::CastingComponents("Usize").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<usize>>> {
-        if let Self::Usize(number) = self {
-            Ok(number)
-        } else {
-            Err(BbEcsError::CastingComponents("Usize").into())
-        }
-    }
-}
-
-impl CastComponents<bool> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<bool>>> {
-        if let Self::Bool(value) = self {
-            Ok(value)
-        } else {
-            Err(BbEcsError::CastingComponents("Bool").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<bool>>> {
-        if let Self::Bool(value) = self {
-            Ok(value)
-        } else {
-            Err(BbEcsError::CastingComponents("Bool").into())
-        }
-    }
-}
-
-impl CastComponents<KeyCode> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<KeyCode>>> {
-        if let Self::GgezKeyCode(value) = self {
-            Ok(value)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezKeyCode").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<KeyCode>>> {
-        if let Self::GgezKeyCode(value) = self {
-            Ok(value)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezKeyCode").into())
-        }
-    }
-}
-
-impl CastComponents<String> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<String>>> {
-        if let Self::Marker(string) = self {
-            Ok(string)
-        } else {
-            Err(BbEcsError::CastingComponents("Marker").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<String>>> {
-        if let Self::Marker(string) = self {
-            Ok(string)
-        } else {
-            Err(BbEcsError::CastingComponents("Marker").into())
-        }
-    }
-}
-
-impl CastComponents<Text> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<Text>>> {
-        if let Self::GgezText(text) = self {
-            Ok(text)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezText").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<Text>>> {
-        if let Self::GgezText(text) = self {
-            Ok(text)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezText").into())
-        }
-    }
-}
-
-impl CastComponents<ggez::audio::SoundData> for ComponentData {
-    fn cast_mut(&mut self) -> Result<&mut Rc<RefCell<ggez::audio::SoundData>>> {
-        if let Self::GgezSound(data) = self {
-            Ok(data)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezSound").into())
-        }
-    }
-
-    fn cast(&self) -> Result<&Rc<RefCell<ggez::audio::SoundData>>> {
-        if let Self::GgezSound(data) = self {
-            Ok(data)
-        } else {
-            Err(BbEcsError::CastingComponents("GgezSound").into())
-        }
-    }
-}
 pub enum Component {
     Point,
     F32,
