@@ -9,7 +9,7 @@ use entity_data::EntityData;
 use eyre::Result;
 use ggez::audio::SoundData;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
+use ggez::graphics::{Color, Mesh, Text, TextFragment};
 
 use crate::components::{CastComponents, ComponentData};
 use crate::data_types::point::Point;
@@ -164,3 +164,4 @@ impl_world_trait!(KeyCode, GgezKeyCode);
 impl_world_trait!(String, Marker);
 impl_world_trait!(Text, GgezText);
 impl_world_trait!(SoundData, GgezSound);
+impl_world_trait!(TextFragment, GgezTextFragment);

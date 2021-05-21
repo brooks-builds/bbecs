@@ -1,7 +1,7 @@
 use eyre::{bail, Result};
 use ggez::audio::SoundData;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
+use ggez::graphics::{Color, Mesh, Text, TextFragment};
 
 use crate::data_types::point::Point;
 
@@ -53,6 +53,7 @@ pub enum Resource {
     Marker(String),
     GgezText(Text),
     GgezSound(ggez::audio::SoundData),
+    GgezTextFragment(TextFragment),
 }
 
 impl_resource_cast!(u32, U32);
@@ -66,3 +67,4 @@ impl_resource_cast!(KeyCode, GgezKeyCode);
 impl_resource_cast!(String, Marker);
 impl_resource_cast!(Text, GgezText);
 impl_resource_cast!(SoundData, GgezSound);
+impl_resource_cast!(TextFragment, GgezTextFragment);

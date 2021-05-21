@@ -6,7 +6,7 @@ use std::rc::Rc;
 use eyre::{bail, Result};
 use ggez::audio::SoundData;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
+use ggez::graphics::{Color, Mesh, Text, TextFragment};
 
 use crate::data_types::point::Point;
 
@@ -49,6 +49,7 @@ pub enum ComponentData {
     Marker(Rc<RefCell<String>>),
     GgezText(Rc<RefCell<Text>>),
     GgezSound(Rc<RefCell<ggez::audio::SoundData>>),
+    GgezTextFragment(Rc<RefCell<TextFragment>>),
 }
 
 impl_component_data_cast!(Point, Point);
@@ -62,6 +63,7 @@ impl_component_data_cast!(KeyCode, GgezKeyCode);
 impl_component_data_cast!(String, Marker);
 impl_component_data_cast!(Text, GgezText);
 impl_component_data_cast!(SoundData, GgezSound);
+impl_component_data_cast!(TextFragment, GgezTextFragment);
 
 pub enum Component {
     Point,
@@ -74,4 +76,5 @@ pub enum Component {
     GgezKeyCode,
     Marker,
     GgezText,
+    GgezTextFragment,
 }

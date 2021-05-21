@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use eyre::Result;
 use ggez::event::KeyCode;
-use ggez::graphics::{Color, Mesh, Text};
+use ggez::graphics::{Color, Mesh, Text, TextFragment};
 
 use crate::errors::BbEcsError;
 use crate::{components::ComponentData, data_types::point::Point};
@@ -205,6 +205,17 @@ impl EntityDataTraits<ggez::audio::SoundData> for EntityData {
     fn insert(&mut self, name: &str, data: ggez::audio::SoundData) -> Result<()> {
         if let Some(components) = self.components.get_mut(name) {
             components.push(ComponentData::GgezSound(Rc::new(RefCell::new(data))));
+        } else {
+            return Err(BbEcsError::NeedToRegister.into());
+        }
+        Ok(())
+    }
+}
+
+impl EntityDataTraits<TextFragment> for EntityData {
+    fn insert(&mut self, name: &str, data: TextFragment) -> Result<()> {
+        if let Some(components) = self.components.get_mut(name) {
+            components.push(ComponentData::GgezTextFragment(Rc::new(RefCell::new(data))));
         } else {
             return Err(BbEcsError::NeedToRegister.into());
         }
