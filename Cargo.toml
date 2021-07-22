@@ -11,3 +11,4 @@ repository = "https://github.com/brooks-builds/bbecs"
 
 [dependencies]
 eyre = "0.6.5"
+thiserror = "1.0.26"

@@ -1,3 +1,7 @@
+use crate::{
+    errors::Errors,
+    query_builder::{Query, QueryResult},
+};
 use std::{
     any::{Any, TypeId},
     cell::RefCell,
@@ -5,8 +9,6 @@ use std::{
     fmt::Debug,
     rc::Rc,
 };
-
-use crate::query_builder::Query;
 
 pub type Components = HashMap<TypeId, Vec<Option<Rc<RefCell<dyn Any>>>>>;
 
@@ -21,11 +23,6 @@ pub struct Entities {
 impl Entities {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn register_component(&mut self, component: impl Any) {
-        self.components.insert(component.type_id(), vec![]);
-        self.bitmap.insert(component.type_id(), 0);
     }
 
     pub fn register_entity(&mut self) -> &mut Self {
@@ -71,14 +68,14 @@ impl Entities {
         Query::new(self)
     }
 
-    pub fn run_query(&self, query: Query) -> Vec<Vec<Rc<RefCell<dyn Any>>>> {
+    pub fn run_query(&self, query: Query) -> QueryResult {
         let mut result = vec![];
         for type_id in query.type_ids.iter() {
             let mut queried_components = vec![];
-            let components = self
-                .components
-                .get(type_id)
-                .expect("Quering for a component that has not been registered");
+            let components = match self.components.get(type_id) {
+                Some(components) => components,
+                None => return Err(Errors::ComponentNotFound.into()),
+            };
             for (index, component) in components.iter().enumerate() {
                 if query.indexes.contains(&index) {
                     queried_components.push(component.as_ref().unwrap().clone());
@@ -86,7 +83,7 @@ impl Entities {
             }
             result.push(queried_components);
         }
-        result
+        Ok(result)
     }
 
     pub fn entity_contains(&self, type_id: &TypeId, bitmask: u128) -> bool {
@@ -101,6 +98,7 @@ impl Entities {
 #[cfg(test)]
 mod test {
     use super::*;
+    use eyre::Result;
     #[test]
     fn test_adding_entity() {
         let mut entities = Entities::new();
@@ -115,7 +113,7 @@ mod test {
 
     #[test]
     #[allow(clippy::float_cmp)]
-    fn test_querying_for_entities() {
+    fn test_querying_for_entities() -> Result<()> {
         let mut entities = Entities::new();
         entities
             .register_entity()
@@ -133,7 +131,7 @@ mod test {
             .new_query()
             .with_component::<Location>()
             .with_component::<Size>()
-            .run();
+            .run()?;
 
         assert_eq!(query.len(), 2);
         assert_eq!(query[0].len(), 2);
@@ -147,6 +145,32 @@ mod test {
         );
         assert_eq!(query[1][0].borrow().downcast_ref::<Size>().unwrap().0, 10.0);
         assert_eq!(query[1][1].borrow().downcast_ref::<Size>().unwrap().0, 11.0);
+        Ok(())
+    }
+
+    #[allow(clippy::float_cmp)]
+    #[test]
+    fn adding_component_later_should_work() -> Result<()> {
+        let mut entities = Entities::new();
+        entities.register_entity().with_component(Size(10.0));
+
+        entities.register_entity().with_component(Size(11.0));
+
+        entities
+            .register_entity()
+            .with_component(Size(12.0))
+            .with_component(DisplayVision);
+
+        let query = entities
+            .new_query()
+            .with_component::<Size>()
+            .with_component::<DisplayVision>()
+            .run()?;
+        assert_eq!(query[0].len(), 1);
+        let wrapped_size = query[0][0].borrow();
+        let size = wrapped_size.downcast_ref::<Size>().unwrap();
+        assert_eq!(size.0, 12.0);
+        Ok(())
     }
 
     #[derive(Debug)]
@@ -154,4 +178,7 @@ mod test {
 
     #[derive(Debug)]
     struct Location(f32, f32);
+
+    #[derive(Debug)]
+    struct DisplayVision;
 }

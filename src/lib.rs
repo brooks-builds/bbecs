@@ -5,6 +5,7 @@ use query_builder::Query;
 use resources::Resources;
 
 pub mod entities;
+pub mod errors;
 pub mod query_builder;
 pub mod resources;
 
@@ -33,10 +34,6 @@ impl World {
 
     pub fn register_entity(&mut self) -> &mut Entities {
         self.entities.register_entity()
-    }
-
-    pub fn register_component(&mut self, component: impl Any) {
-        self.entities.register_component(component);
     }
 
     pub fn query(&self) -> Query {

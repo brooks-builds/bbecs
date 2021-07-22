@@ -5,7 +5,11 @@ use std::{
     rc::Rc,
 };
 
+use eyre::Result;
+
 use crate::entities::Entities;
+
+pub type QueryResult = Result<Vec<Vec<Rc<RefCell<dyn Any>>>>>;
 
 #[derive(Debug)]
 pub struct Query<'a> {
@@ -28,7 +32,7 @@ impl<'a> Query<'a> {
         self
     }
 
-    pub fn run(mut self) -> Vec<Vec<Rc<RefCell<dyn Any>>>> {
+    pub fn run(mut self) -> QueryResult {
         for (index, entity_bitmask) in self.entities.bitmask.iter().enumerate() {
             let mut has_component = true;
             for type_id in self.type_ids.iter() {
