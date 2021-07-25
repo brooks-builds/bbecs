@@ -43,4 +43,9 @@ impl World {
     pub fn remove_component<T: Any + 'static>(&mut self, index: usize) {
         self.entities.remove_component(&TypeId::of::<T>(), index);
     }
+
+    pub fn add_component_to_entity(&mut self, component: impl Any, entity_index: usize) {
+        self.entities
+            .add_component_to_entity(component, entity_index);
+    }
 }

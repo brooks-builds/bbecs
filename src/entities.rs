@@ -41,6 +41,7 @@ impl Entities {
                 *last_component = Some(Rc::new(RefCell::new(component)));
             }
         } else {
+            self.register_component(type_id);
             self.add_component(type_id, component);
         }
         let bitmap_value = self.bitmap.get(&type_id).unwrap();
@@ -56,11 +57,15 @@ impl Entities {
     }
 
     pub fn add_component(&mut self, type_id: TypeId, component: impl Any) {
+        let components = self.components.get_mut(&type_id).unwrap();
+        components.push(Some(Rc::new(RefCell::new(component))));
+    }
+
+    pub fn register_component(&mut self, type_id: TypeId) {
         let mut components: Vec<Option<Rc<RefCell<dyn Any>>>> = vec![];
         for _ in 0..self.entity_count - 1 {
             components.push(None);
         }
-        components.push(Some(Rc::new(RefCell::new(component))));
         self.components.insert(type_id, components);
         let new_bitmask = 2_u128.pow(self.bitmap.len() as u32);
         self.bitmap.insert(type_id, new_bitmask);
@@ -98,6 +103,16 @@ impl Entities {
 
     pub fn remove_component(&mut self, type_id: &TypeId, index: usize) {
         self.bitmask[index] ^= self.bitmap.get(type_id).unwrap();
+    }
+
+    pub fn add_component_to_entity(&mut self, component: impl Any, entity_index: usize) {
+        if !self.bitmap.contains_key(&component.type_id()) {
+            self.register_component(component.type_id());
+        }
+        if let Some(components) = self.components.get_mut(&component.type_id()) {
+            self.bitmask[entity_index] |= self.bitmap.get(&component.type_id()).unwrap();
+            components[entity_index] = Some(Rc::new(RefCell::new(component)));
+        }
     }
 }
 
