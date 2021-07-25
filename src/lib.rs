@@ -1,4 +1,4 @@
-use std::any::Any;
+use std::any::{Any, TypeId};
 
 use entities::Entities;
 use query_builder::Query;
@@ -38,5 +38,9 @@ impl World {
 
     pub fn query(&self) -> Query {
         self.entities.new_query()
+    }
+
+    pub fn remove_component<T: Any + 'static>(&mut self, index: usize) {
+        self.entities.remove_component(&TypeId::of::<T>(), index);
     }
 }

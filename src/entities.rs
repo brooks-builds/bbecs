@@ -1,3 +1,5 @@
+use eyre::Result;
+
 use crate::{
     errors::Errors,
     query_builder::{Query, QueryResult},
@@ -68,7 +70,7 @@ impl Entities {
         Query::new(self)
     }
 
-    pub fn run_query(&self, query: Query) -> QueryResult {
+    pub fn run_query(&self, query: Query) -> Result<QueryResult> {
         let mut result = vec![];
         for type_id in query.type_ids.iter() {
             let mut queried_components = vec![];
@@ -92,6 +94,10 @@ impl Entities {
         } else {
             false
         }
+    }
+
+    pub fn remove_component(&mut self, type_id: &TypeId, index: usize) {
+        self.bitmask[index] ^= self.bitmap.get(type_id).unwrap();
     }
 }
 
@@ -131,7 +137,8 @@ mod test {
             .new_query()
             .with_component::<Location>()
             .with_component::<Size>()
-            .run()?;
+            .run()?
+            .1;
 
         assert_eq!(query.len(), 2);
         assert_eq!(query[0].len(), 2);
@@ -165,7 +172,8 @@ mod test {
             .new_query()
             .with_component::<Size>()
             .with_component::<DisplayVision>()
-            .run()?;
+            .run()?
+            .1;
         assert_eq!(query[0].len(), 1);
         let wrapped_size = query[0][0].borrow();
         let size = wrapped_size.downcast_ref::<Size>().unwrap();
